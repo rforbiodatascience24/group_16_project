@@ -6,3 +6,8 @@
 * Elena Iriondo Delgado (s243312)
 * Jorge Santiago Bajo (s243310)
 * Eric Torres García (s243275)
+
+## Data retrieval 
+This section will contain information about data retrieval. 
+
+... In progres ... 
