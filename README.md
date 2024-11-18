@@ -1,6 +1,6 @@
 # Project R for Bio Data Science | group 16 
 
-## 1. Group members 
+## Project Contributors
 * Lucía de Lamadrid Ordóñez (s243311)
 * Konstantina Gkopi (s243692)
 * Elena Iriondo Delgado (s243312)
