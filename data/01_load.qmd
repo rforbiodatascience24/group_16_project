@@ -1,0 +1,30 @@
+```{r}
+#| message: false
+library(tidyverse)
+library(R.utils)
+library(readr)
+```
+
+```{r}
+# Load the main data file
+raw_dir <- "../_raw"
+data_file_metadata <- "/MicrobiomeWithMetadata.csv"
+data_file_dictionary <- "/MicrobiomeMetadataDictionary.csv"
+data_file_otu <- "/MicrobiomeOTUtaxonomy.csv"
+
+data_path_metadata = str_c(raw_dir,data_file_metadata)
+data_path_dictionary = str_c(raw_dir,data_file_dictionary)
+data_path_otu = str_c(raw_dir,data_file_otu)
+
+```
+
+```{r}
+#| message: false
+
+# Load data
+metadata_df <- read_csv(data_path_metadata)
+dictionary_df <- read_csv(data_path_dictionary)
+otu_df <- read_csv(data_path_otu)
+
+
+```
