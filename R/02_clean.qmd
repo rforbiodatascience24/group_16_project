@@ -21,7 +21,7 @@ library(readr)
 
 ```{r}
 metadata_df <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
-dim(metadata_df)
+head(metadata_df)
 ```
 
 We are going to check if there are missing values (NA):
@@ -42,10 +42,6 @@ A dataset is tidy when:
 In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
 ```{r}
-colnames(metadata_df)
-```
-
-```{r}
 metadata_df <- metadata_df |> 
   pivot_longer(
     cols = starts_with("OTU"), 
@@ -53,7 +49,7 @@ metadata_df <- metadata_df |>
     values_to = "rel_abundance"
   )
 
-head(metadata_df)
+dim(metadata_df)
 ```
 
 As a result, we get a dataframe of $N = 4,519,800$ !

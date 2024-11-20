@@ -34,7 +34,7 @@ dictionary_df <- read_csv(data_path_dictionary)
 otu_df <- read_csv(data_path_otu)  
 ```
 
-### 3. Create .tsv files
+### 3. Create .tsv files 
 
 ```{r}
 metadata_df |> 
