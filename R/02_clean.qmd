@@ -52,4 +52,4 @@ metadata_df <- metadata_df |>
 dim(metadata_df)
 ```
 
-As a result, we get a dataframe of $N = 4,519,800$!
+As a result, we get a dataframe of $N = 4,519,800$ !
