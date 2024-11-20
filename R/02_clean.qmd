@@ -62,7 +62,101 @@ dim(metadata_df_long)
 
 As a result, we get a dataframe of $N = 4,519,800$ !
 
-It is clear that with such a long dataset, there must be some filtering by a threshoold. Before that, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
+**Exploring OTU Abundance Distributions and Determining Filtering Thresholds**
+
+To reduce the size of the dataset from the original $N = 4,519,800$ rows and focus on meaningful OTUs, we apply filtering to remove low-abundance and negligible contributors.
+
+We calculated the mean relative abundance of each OTU, ranked them in descending order, computed their cumulative contribution to total abundance, and plotted a cumulative contribution curve to identify key OTUs contributing significantly to the microbiome.
+
+```{r}
+# Calculate cumulative contribution
+cumulative_otus <- metadata_df_long |>
+  group_by(OTU) |>
+  summarize(mean_abundance = mean(rel_abundance)) |>
+  arrange(desc(mean_abundance)) |>
+  mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
+
+head(cumulative_otus)
+
+# Plot cumulative contribution
+ggplot(cumulative_otus, aes(x = reorder(OTU, -mean_abundance), y = cumulative_abundance, group = 1)) +
+  geom_line() +
+  geom_hline(yintercept = 0.95, linetype = "dashed", color = "red") +
+  labs(title = "Cumulative Contribution of OTUs", x = "OTU (Ranked by Abundance)", y = "Cumulative Abundance") +
+theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()
+
+)
+
+```
+
+```{r}
+# Filter OTUs contributing to 95% cumulative abundance
+otus_to_keep <- cumulative_otus |>
+  filter(cumulative_abundance <= 0.95) |>
+  pull(OTU)
+
+# Filter the metadata to retain only these OTUs
+filtered_metadata <- metadata_df_long |>
+  filter(OTU %in% otus_to_keep)
+
+filtered_metadata
+```
+
+As a result, we get a data frame of $N = 264,600$ !
+
+```{r}
+# Number of OTUs before filtering
+n_total_otus <- n_distinct(metadata_df_long$OTU)
+
+# Number of OTUs after filtering
+n_filtered_otus <- n_distinct(filtered_metadata$OTU)
+
+# Print results
+cat("Number of OTUs before filtering:", n_total_otus, "\n")
+cat("Number of OTUs after filtering:", n_filtered_otus, "\n")
+cat("Number of OTUs removed:", n_total_otus - n_filtered_otus, "\n")
+
+```
+
+Filtering down from **6,696 OTUs to 392** (removing **6,304 OTUs**) might seem like a large loss, but this is often expected in microbiome datasets due to the nature of the data.
+
+we check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them.
+
+```{r}
+# Distribution of OTU relative abundances
+ggplot(filtered_metadata, aes(x = rel_abundance)) +
+  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  scale_x_log10() +
+  labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
+  theme_minimal()
+
+```
+
+Filter stricter because the distribution shows a large number of OTUs with extremely low relative abundances, likely representing noise or negligible contributors.
+
+```{r}
+# Set the stricter abundance threshold
+abundance_threshold <- 1e-6
+# Apply the threshold to filter OTUs
+filtered_metadata_stricter <- filtered_metadata |>
+  filter(rel_abundance >= abundance_threshold)
+filtered_metadata_stricter
+
+```
+
+As a result, we get a data frame of $N = 65,938$ !
+
+```{r}
+# Plot the distribution of relative abundances after stricter filtering
+ggplot(filtered_metadata_stricter, aes(x = rel_abundance)) +
+  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  scale_x_log10() +
+  labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
+  theme_minimal()
+
+```
+
+We can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
 
 ```{r}
 dictionary_df <- read.table('../data/01_data_dictionary.tsv', header=FALSE, sep='\t')
