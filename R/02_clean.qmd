@@ -53,3 +53,11 @@ dim(metadata_df)
 ```
 
 As a result, we get a dataframe of $N = 4,519,800$ !
+
+It is clear that with such a long dataset, there must be some filtering by a threshoold. Before that, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
+
+```{r}
+dictionary_df <- read.table('../data/01_data_dictionary.tsv', header=TRUE, sep='\t')
+```
+
+It is clear that the primary key of `metadata_df` is a combination of all the columns. We can add a surrogate key for clearly identifying each observation.
