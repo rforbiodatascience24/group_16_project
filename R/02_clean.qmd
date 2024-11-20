@@ -65,7 +65,50 @@ As a result, we get a dataframe of $N = 4,519,800$ !
 It is clear that with such a long dataset, there must be some filtering by a threshoold. Before that, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
 
 ```{r}
-dictionary_df <- read.table('../data/01_data_dictionary.tsv', header=TRUE, sep='\t')
+dictionary_df <- read.table('../data/01_data_dictionary.tsv', header=FALSE, sep='\t')
+```
+
+```{r}
+head(dictionary_df)
+```
+
+```{r}
+dictionary_long <- dictionary_df |> 
+  mutate(Column = ifelse(grepl("^[A-Za-z]", V1), V1, NA)) |> 
+  fill(Column, .direction = "down") |> 
+  filter(!is.na(V2)) |> 
+  filter(!V1 == Column) |> 
+  rename(Value = V1, Label = V2) |> 
+  select(Column, Value, Label)
+```
+
+```{r}
+dictionary_long
+```
+
+As the dataset still contains a large number of rows, the process is taking a long time. Therefore, I created a subset with only a thousand rows and performed the label substitution to verify if the code works. It does! Once we finalize the dataset, we can apply the changes to the entire data and create the new dataset `metadata_df_long_label`.
+
+```{r}
+metadata_mil <- metadata_df_long[1:1000,]
+dim(metadata_mil)
+```
+
+```{r}
+columns_to_replace <- unique(dictionary_long$Column)
+
+for (col in columns_to_replace) {
+  column_dict <- dictionary_long |> filter(Column == col)
+    
+  # Sustituir los valores en la columna principal
+  metadata_mil[[col]] <- sapply(metadata_mil[[col]], function(x) {
+   label <- column_dict |> filter(Value == x) |> pull(Label)
+    if (length(label) > 0) label else x # Reemplazar si hay etiqueta, sino mantener original
+  })
+}
+```
+
+```{r}
+metadata_mil
 ```
 
 It is clear that the primary key of `metadata_df` is a combination of all the columns. We can add a surrogate key for clearly identifying each observation.
