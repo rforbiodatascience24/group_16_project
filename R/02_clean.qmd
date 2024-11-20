@@ -1,26 +1,55 @@
 ---
-title: "02_clean"
-format: html
+title: "Data cleaning"
+author: Eric Torres, ...
+format:
+  html:
+    embed-resources: true
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+### 1. Load packages
 
 ```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
+#| message: false 
 #| echo: false
-2 * 2
+rm(list=ls())
+library(tidyverse) 
+library(readr)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## 2. Read data
+
+```{r}
+metadata_df <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
+head(metadata_df)
+```
+
+We are going to check if there are missing values (NA):
+
+```{r}
+na_check <- anyNA(metadata_df)
+na_check
+```
+
+A dataset is tidy when:
+
+-   Each variable is a column
+
+-   Each observation is a row
+
+-   Each value is a cell
+
+In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
+
+```{r}
+metadata_df <- metadata_df |> 
+  pivot_longer(
+    cols = starts_with("OTU"), 
+    names_to = "OTU", 
+    values_to = "rel_abundance"
+  )
+
+dim(metadata_df)
+```
+
+As a result, we get a dataframe of $N = 4,519,800$ !
