@@ -1,6 +1,6 @@
 ---
 title: "Data cleaning"
-author: Eric Torres, ...
+author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi.
 format:
   html:
     embed-resources: true
@@ -82,12 +82,15 @@ head(cumulative_otus)
 ggplot(cumulative_otus, aes(x = reorder(OTU, -mean_abundance), y = cumulative_abundance, group = 1)) +
   geom_line() +
   geom_hline(yintercept = 0.95, linetype = "dashed", color = "red") +
-  labs(title = "Cumulative Contribution of OTUs", x = "OTU (Ranked by Abundance)", y = "Cumulative Abundance") +
+  geom_hline(yintercept = 0, color = "black", linetype = "solid") +   # Add x-axis
+  geom_vline(xintercept = 0, color = "black", linetype = "solid") +   # Add y-axis
+  labs(title = "Cumulative Contribution of OTUs", x = "OTU (Ranked by Abundance)", y = "Cumulative Abundance") +  
 theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()
-
 )
 
 ```
+
+We are going to keep the OTUs that made up until 95% of all the cumulative abundance. There are many OTUs that are very little represented, and so they hardly add nothing to the cumulative abundance. Those are the ones we are getting rid of:
 
 ```{r}
 # Filter OTUs contributing to 95% cumulative abundance
@@ -115,12 +118,13 @@ n_filtered_otus <- n_distinct(filtered_metadata$OTU)
 cat("Number of OTUs before filtering:", n_total_otus, "\n")
 cat("Number of OTUs after filtering:", n_filtered_otus, "\n")
 cat("Number of OTUs removed:", n_total_otus - n_filtered_otus, "\n")
+cat("Percentage of OTUs removed:", (n_total_otus - n_filtered_otus) * 100 / n_total_otus, "% \n")
 
 ```
 
 Filtering down from **6,696 OTUs to 392** (removing **6,304 OTUs**) might seem like a large loss, but this is often expected in microbiome datasets due to the nature of the data.
 
-we check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them.
+We check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them.
 
 ```{r}
 # Distribution of OTU relative abundances
