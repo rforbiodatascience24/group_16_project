@@ -31,6 +31,14 @@ na_check <- anyNA(metadata_df)
 na_check
 ```
 
+Is the value relative abundance? It is, as the total value of each row is 1.
+
+```{r}
+otu_columns <- select(metadata_df, starts_with("OTU"))
+row_sums <- rowSums(otu_columns)
+summary(row_sums)
+```
+
 A dataset is tidy when:
 
 -   Each variable is a column
@@ -42,14 +50,14 @@ A dataset is tidy when:
 In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
 ```{r}
-metadata_df <- metadata_df |> 
+metadata_df_long <- metadata_df |> 
   pivot_longer(
     cols = starts_with("OTU"), 
     names_to = "OTU", 
     values_to = "rel_abundance"
   )
 
-dim(metadata_df)
+dim(metadata_df_long)
 ```
 
 As a result, we get a dataframe of $N = 4,519,800$ !
