@@ -1,6 +1,6 @@
 ---
 title: "Data augmentation"
-author: Lucía de Lamadrid, Jorge Santiago Bajo.
+author: Lucía de Lamadrid, Jorge Santiago Bajo, Eric Torres García
 format:
   html:
     embed-resources: true
@@ -36,3 +36,36 @@ The different columns in the OTU data are: Domain, Phylum, Class, Order, Family,
 ```{r}
 
 ```
+
+If we do a deeper analysis of this dataset, we can actually check it is very ill-defined, if not directly erroneous. An example can be seen on OTU94, which presents several problems:
+
+```{r}
+otu_df |> 
+  filter(OTU.ID == "OTU94")
+```
+
+The information from this OTU is the following:
+
+-   Kingdom: Bacteria
+
+-   Phyllum: Actinobacteria
+
+-   Class: Actinobacteria
+
+Here comes the first problems: they chose the same term for the phyllum and class! This is misleading and unnecessarily confusing. For disambiguate, the following synonyms could have been used instead: Actinomycetota for the phyllum and Actinomycetia for the class.
+
+-   Order: Actinobacteridae
+
+Actinobacteridae is actually a subclass, which is no longer in use (see <https://lpsn.dsmz.de/subclass/actinobacteridae>).
+
+-   Family: Actinomycetales
+
+Actinomycetales is actually an order, not a family.
+
+-   Genus: Frankineae
+
+Frankineae is an order, not a genus, and it is different from the previous order mentioned.
+
+Additionally, there are two extra columns with no identification of taxonomy: Geodermatophilaceae and Blastococcus.
+
+Such delirium of dataset is the result of complete lack of manual curation and care. Different actions need to be taken to make sense of the biological data.
