@@ -1,13 +1,21 @@
 # Project R for Bio Data Science | group 16 
 
+This repository includes the analysis of data wrangling and visualization of a dataset about the effect of diet on the human gut microbiome. 
+
 ## Project Contributors
-* Lucía de Lamadrid Ordóñez (s243311)
-* Konstantina Gkopi (s243692)
-* Elena Iriondo Delgado (s243312)
-* Jorge Santiago Bajo (s243310)
-* Eric Torres García (s243275)
+
+| Family name | First name | student ID |
+|----------|----------|----------|
+| De Lamadrid Ordóñez | Lucía | s243311 |
+| Gkopi | Konstantina | s243692 |
+| Iriondo Delgado | Elena | s243312 |
+| Satiago Bajo | Jorge | s243310 |
+| Torres García | Eric | s243275 |
 
 ## Data retrieval 
 The dataset is available in the following link: https://www.exploredata.net/Downloads/Microbiome-Data-Set. In particular, we work with the files MicrobiomeWithMetadata.csv as well as the glossary and the dictionary. 
 
 ... In progres ... 
+
+## Navigation through this directory 
+* [R](https://github.com/rforbiodatascience24/group_16_project/tree/main/R): this folder contains the scripts for data loading, cleanig, augmentation, description and analysis. 
