@@ -8,6 +8,6 @@
 * Eric Torres García (s243275)
 
 ## Data retrieval 
-This section will contain information about data retrieval. 
+The dataset is available in the following link: https://www.exploredata.net/Downloads/Microbiome-Data-Set. In particular, we work with the files MicrobiomeWithMetadata.csv as well as the glossary and the dictionary. 
 
 ... In progres ... 
