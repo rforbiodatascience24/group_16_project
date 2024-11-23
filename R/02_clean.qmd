@@ -174,11 +174,12 @@ Finally, we can replace the numeric codes with descriptive labels. This includes
 
 ```{r}
 filtered_metadata_stricter_label <- filtered_metadata_stricter|> 
-  mutate(Diet = case_when(Diet == 0 ~ "Western",
-                          Diet == 1 ~ "CARBR", 
-                          Diet == 2 ~ "FATR", 
-                          Diet == 3 ~ "Suckling", 
-                          Diet == 4 ~ "Human")) |> 
+  mutate(Diet = case_when(Diet == 0 ~ "LFPP",
+                          Diet == 1 ~ "Western",
+                          Diet == 2 ~ "CARBR",
+                          Diet == 3 ~ "FATR",
+                          Diet == 4 ~ "Suckling",
+                          Diet == 5 ~ "Human")) |> 
   mutate(Source = case_when(Source == 0 ~ "Cecum1",
                           Source == 1 ~ "Cecum2", 
                           Source == 2 ~ "Colon1", 
