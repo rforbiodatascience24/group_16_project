@@ -27,8 +27,8 @@ head(clean_df)
 In this section, we'll be working with the OTUs taxonomy file, so let's load it as well.
 
 ```{r}
-otu_df <- read.table('../data/01_data_otu.tsv', header=TRUE, sep='\t')
-head(otu_df)
+otu_df_original <- read.table('../data/01_data_otu.tsv', header=TRUE, sep='\t')
+head(otu_df_original)
 ```
 
 The different columns in the OTU data are: Domain, Phylum, Class, Order, Family, Genus and Species. Kingdom is not represented in this case.
@@ -69,3 +69,19 @@ Frankineae is an order, not a genus, and it is different from the previous order
 Additionally, there are two extra columns with no identification of taxonomy: Geodermatophilaceae and Blastococcus.
 
 Such delirium of dataset is the result of complete lack of manual curation and care. Different actions need to be taken to make sense of the biological data.
+
+```{r}
+otu_df_modified <-  otu_df_original |> 
+  select(OTU.ID, Phylum, Class) |> 
+  mutate(Phylum = if_else(is.na(Phylum), "Unclassified", Phylum)) |> 
+  mutate(Class = if_else(is.na(Class), "Unclassified", Class))
+
+otu_df_modified
+```
+
+```{r}
+clean_df <- clean_df |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  relocate(Phylum, Class, .after = OTU) 
+```
