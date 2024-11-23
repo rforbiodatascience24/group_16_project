@@ -49,6 +49,16 @@ A dataset is tidy when:
 
 -   Each value is a cell
 
+First, we will create a SampleID column.
+
+```{r}
+# Creation and relocation of SampleID
+metadata_df <- metadata_df |>
+  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
+  relocate(SampleID, .before = everything())  # Move SampleID to the first position
+head(metadata_df)
+```
+
 In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
 ```{r}
@@ -58,7 +68,6 @@ metadata_df_long <- metadata_df |>
     names_to = "OTU", 
     values_to = "rel_abundance"
   )
-
 dim(metadata_df_long)
 ```
 
