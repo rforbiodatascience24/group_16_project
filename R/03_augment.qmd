@@ -27,7 +27,7 @@ head(clean_df)
 In this section, we'll be working with the OTUs taxonomy file, so let's load it as well.
 
 ```{r}
-otu_df <- read.table('../data/01_data_otu.tsv', header=TRUE, sep='\t')
+otu_df <- read.table('../data/01_data_otu.tsv', header=TRUE, sep=',')
 head(otu_df)
 ```
 

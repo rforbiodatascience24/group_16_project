@@ -1,6 +1,6 @@
 ---
 title: "Data cleaning"
-author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi.
+author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format:
   html:
     embed-resources: true
