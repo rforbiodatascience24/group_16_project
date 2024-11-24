@@ -114,6 +114,14 @@ clean_df |>
 
 ### Microbiota composition of mice with different diet and donor combination (relative abundance of phyla)
 
+In order to compare the general composition of the microbiota in the mice with different donor and diet, we may represent the relative abundance of the most prevalent phyla.
+
+For this purpose we will use the clean data.
+
+```{r}
+
+```
+
 ### Biodiversity of humanised mice microbiota with different diet
 
 We can use diversity indices in order to quantify biodiversity. As we know the relative abundance of each OTU, we can use the Shannon diversity index. Based on Claude Shannon's formula for entropy, this popular ecological metric takes into account the number of species living in a habitat (richness) and their relative abundance (evenness).
@@ -180,3 +188,5 @@ ggplot(final_shannon, aes(x = Diet, y = shannon_index)) +
   theme_minimal() +
   theme(legend.position = "none")
 ```
+
+Interestingly, the Western diet leads to a more biodiverse microbiota than the "healthier" LF-PP diet in the humanised mice.
