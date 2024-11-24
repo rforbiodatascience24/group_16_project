@@ -70,6 +70,8 @@ Additionally, there are two extra columns with no identification of taxonomy: Ge
 
 Such delirium of dataset is the result of complete lack of manual curation and care. Different actions need to be taken to make sense of the biological data.
 
+We decide to work only with the phylum and class, as these taxonomical categories are the ones being used for results presentation in the reference paper we are working with.
+
 ```{r}
 otu_df_modified <-  otu_df_original |> 
   select(OTU.ID, Phylum, Class) |> 
@@ -78,6 +80,8 @@ otu_df_modified <-  otu_df_original |>
 
 otu_df_modified
 ```
+
+After that, we perform a left join to include the taxonomical information to the data frame:
 
 ```{r}
 clean_df <- clean_df |>  
