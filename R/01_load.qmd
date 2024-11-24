@@ -1,5 +1,6 @@
 ---
 title: "01_load"
+author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format: html
 editor: visual
 ---
@@ -9,17 +10,43 @@ editor: visual
 ```{r}
 #| message: false 
 library(tidyverse) 
+library(googledrive)
 library(readr)
 ```
 
-### 2. Read files
+### 2. Download and read files
+
+```{r}
+# Definition of the folder where we want the data in
+target_folder <- "../_raw"
+
+# Check if the folder exists; create it if not
+if (!dir.exists(target_folder)) {
+  dir.create(target_folder)
+  message("Created folder: ", target_folder)
+} else {
+  message("Folder already exists: ", target_folder)
+}
+
+# File ID on Google Drive
+file_id <- "1CW63f5yjQsfovsbEJECvi1NlxkAIEer4"
+
+# Definition of the path where it will be downloaded it
+dest_path <- file.path(target_folder, "MicrobiomeOTUtaxonomy.zip")
+
+# Download the file into _raw
+drive_download(as_id(file_id), path = dest_path, overwrite = TRUE)
+
+# Unzip 
+unzip(dest_path, exdir = target_folder)
+```
 
 ```{r}
 # Load the main data file 
 raw_dir <- "../_raw" 
-data_file_metadata <- "/MicrobiomeWithMetadata.csv" 
-data_file_dictionary <- "/MicrobiomeMetadataDictionary.csv" 
-data_file_otu <- "/MicrobiomeOTUtaxonomy.csv"  
+data_file_metadata <- "/data_zip/MicrobiomeWithMetadata.csv" 
+data_file_dictionary <- "/data_zip/MicrobiomeMetadataDictionary.csv" 
+data_file_otu <- "/data_zip/MicrobiomeOTUtaxonomy.csv"  
 
 data_path_metadata = str_c(raw_dir,data_file_metadata) 
 data_path_dictionary = str_c(raw_dir,data_file_dictionary) 
@@ -37,6 +64,10 @@ otu_df <- read_csv(data_path_otu)
 ### 3. Create .tsv files
 
 ```{r}
+if (!dir.exists("../data")) {
+  dir.create("../data")
+}
+
 metadata_df |> 
   write_tsv(file = "../data/01_data_metadata.tsv")
 
