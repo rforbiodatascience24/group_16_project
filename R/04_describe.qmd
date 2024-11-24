@@ -1,26 +1,64 @@
 ---
 title: "04_describe"
+author: Eric Torres, Lucia de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format: html
 editor: visual
 ---
 
-## Quarto
+## Data visualization and description
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+### Abundance of each OTU in samples
 
 ```{r}
-1 + 1
+clean_df |> 
+  filter(Diet %in% c("LFPP", "Western")) |> 
+  group_by(Source, Diet) |> 
+  mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize within samples
+  group_by(Source, Diet, OTU) |> 
+  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate mean abundance
+  group_by(Source, Diet) |> 
+  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances
+  ggplot(aes(x = Diet,
+             y = mean_rel_abund,
+             fill = OTU)) +
+  geom_bar(stat = "identity",
+           position = "stack") +
+  facet_wrap(~ Source) + 
+  labs(
+    title = "Normalized Relative Abundance of OTUs",
+    x = "Diet",
+    y = "Relative Abundance (Proportion)",
+    fill = "OTU"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+## Decide among this one or the next one: this seems more explicative, but less aesthetic and the bars are smaller
 ```
-
-You can add options to executable code like this
 
 ```{r}
-#| echo: false
-2 * 2
+clean_df |> 
+  filter(Diet %in% c("LFPP", "Western")) |> 
+  group_by(Source, Diet) |> 
+  mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
+  group_by(Source, Diet, OTU) |> # CHANGE OTU BY PHYLUM
+  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate the mean relative abundances
+  group_by(Source, Diet) |> 
+  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each one is 1
+  ggplot(aes(x = Source,
+             y = mean_rel_abund,
+             fill = OTU)) + #CHANGE OTU BY PHYLUM
+  geom_bar(stat = "identity",
+           position = "stack") +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~ Diet) + 
+  labs(
+    title = "Normalized Relative Abundance of OTUs per source and diet type",
+    x = "Source type",
+    y = "Relative Abundance (Proportion)",
+    fill = "OTU"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none", # change when data augmentation has been done
+        legend.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
