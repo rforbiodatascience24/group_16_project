@@ -27,7 +27,7 @@ head(clean_df)
 In this section, we'll be working with the OTUs taxonomy file, so let's load it as well.
 
 ```{r}
-otu_df_original <- read.table('../data/01_data_otu.tsv', header=TRUE, sep='\t')
+otu_df_original <- read.table('../data/01_data_otu.tsv', header = TRUE, sep = ",")
 head(otu_df_original)
 ```
 
@@ -40,7 +40,7 @@ The different columns in the OTU data are: Domain, Phylum, Class, Order, Family,
 If we do a deeper analysis of this dataset, we can actually check it is very ill-defined, if not directly erroneous. An example can be seen on OTU94, which presents several problems:
 
 ```{r}
-otu_df |> 
+otu_df_original |> 
   filter(OTU.ID == "OTU94")
 ```
 
@@ -75,8 +75,8 @@ We decide to work only with the phylum and class, as these taxonomical categorie
 ```{r}
 otu_df_modified <-  otu_df_original |> 
   select(OTU.ID, Phylum, Class) |> 
-  mutate(Phylum = if_else(is.na(Phylum), "Unclassified", Phylum)) |> 
-  mutate(Class = if_else(is.na(Class), "Unclassified", Class))
+  mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
+  mutate(Class = if_else(Class == "", "Unclassified", Class))
 
 otu_df_modified
 ```
