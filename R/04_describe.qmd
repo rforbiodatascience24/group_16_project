@@ -119,7 +119,31 @@ In order to compare the general composition of the microbiota in the mice with d
 For this purpose we will use the clean data.
 
 ```{r}
-
+clean_df |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern")) |> 
+  group_by(Donor, Diet) |> 
+  mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
+  group_by(Donor, Diet, Phylum) |> 
+  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate the mean relative abundances
+  group_by(Donor, Diet) |> 
+  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each one is 1
+  ggplot(aes(x = Donor,
+             y = mean_rel_abund,
+             fill = Phylum)) + 
+  geom_bar(stat = "identity",
+           position = "stack") +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~ Diet) + 
+  labs(
+    title = "Normalized Relative Abundance of Phyla per donor and diet type",
+    x = "Donor type",
+    y = "Relative Abundance (Proportion)",
+    fill = "Phylum"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", # change when data augmentation has been done
+        legend.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ### Biodiversity of humanised mice microbiota with different diet
