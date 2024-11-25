@@ -1,26 +1,61 @@
 ---
 title: "05_analysis_1"
+author: Eric Torres, Lucía de Lamadrid
 format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+library("tidyverse")
+library("ggrepel")
+library("ggtext")
+library("broom") 
 ```
 
-You can add options to executable code like this
+We want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
+
+First, we will filter for the two kinds of diet and the two types of phyla we are going to be working with:
 
 ```{r}
-#| echo: false
-2 * 2
+clean_df_filtered_analysis <- 
+  clean_df |> 
+  filter(Phylum == "Firmicutes" | Phylum == "Bacteroidetes") |>  
+  filter(Diet == "LFPP" | Diet == "Western") |>  
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, 
+                         Diet == "Western" ~ 1))
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+clean_df_filtered_nested <- clean_df_filtered_analysis |> 
+  group_by(OTU) |> 
+  nest() |> 
+  ungroup()
+```
+
+```{r}
+clean_df_filtered_nested <- clean_df_filtered_nested |> 
+  group_by(OTU) |>  
+  mutate(model_object = map (.x = data, 
+                             .f = ~lm(formula = rel_abundance ~ Diet, 
+                                      data = .x)))
+```
+
+```{r}
+otus_estimate <- clean_df_filtered_nested |> 
+  mutate(model_object_tidy = map(.x = model_object, 
+                                 .f = ~tidy(.x, conf.int = TRUE, conf.level = 0.95))
+  ) |>  
+  unnest(model_object_tidy) |> 
+  filter(term == "Diet") |>
+  select (OTU, p.value, estimate, conf.low, conf.high) |> 
+  ungroup() |> 
+  mutate(
+    # Adjust p-values
+    q.value = p.adjust(p.value), 
+    is_significant = case_when( 
+      q.value >= 0.05 ~ "no",
+      q.value < 0.05 ~ "yes"
+      )
+  )
+
+```
