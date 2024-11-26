@@ -45,7 +45,7 @@ otu_data_scaled <- as_tibble(otu_data_scaled)
 ```{r}
 # Add relevant metadata (e.g., Donor)
 otu_data_with_metadata <- otu_data_scaled |>
-  mutate(Donor = filtered_metadata_wider$Donor)
+  mutate(Donor = filtered_metadata_wider |> pull(Donor))
 ```
 
 Distance matrices are used as input for clustering algorithms. Euclidean distance measures the similarity between samples.
@@ -74,8 +74,8 @@ cluster_labels <- cutree(hclust_result, k = 3) |>
   rename(Cluster = value)
 
 # Attach cluster labels to metadata
-clustered_metadata <- filtered_metadata_wider |>
-  mutate(Cluster = as.factor(cluster_labels$Cluster))
+clustered_metadata <- filtered_metadata_wider |> 
+  mutate(Cluster = cluster_labels |> pull(Cluster))
 
 ```
 
