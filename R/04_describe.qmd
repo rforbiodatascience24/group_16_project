@@ -11,7 +11,6 @@ editor: visual
 
     ```{r}
     #| message: false 
-    #| echo: false
     rm(list=ls())
     library(dplyr) 
     ```
@@ -24,6 +23,7 @@ editor: visual
     ```
 
     ```{r}
+    #| message: false 
     raw_data <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
     head(raw_data)
     ```
