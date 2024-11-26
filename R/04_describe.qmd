@@ -24,7 +24,7 @@ editor: visual
     ```
 
     ```{r}
-    raw_data <- read.table('./data/01_data_metadata.tsv', header=TRUE, sep='\t')
+    raw_data <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
     head(raw_data)
     ```
 
