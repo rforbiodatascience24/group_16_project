@@ -1,7 +1,9 @@
 ---
-title: "01_load"
+title: "Data loading"
 author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
-format: html
+format:
+  html:
+    embed-resources: true
 editor: visual
 ---
 
