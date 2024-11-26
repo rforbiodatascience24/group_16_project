@@ -19,6 +19,8 @@ library(readr)
 
 ```{r}
 #| message: false 
+data_folder = "../data"
+
 metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
                           header = TRUE, 
                           sep = '\t')
