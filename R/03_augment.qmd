@@ -89,3 +89,7 @@ clean_df <- clean_df |>
             join_by(OTU == OTU.ID)) |> 
   relocate(Phylum, Class, .after = OTU) 
 ```
+
+```{r}
+write.table(clean_df, "../data/03_metadata_long_filtered_taxonom.tsv", sep = "\t", quote = FALSE, col.names = NA)
+```
