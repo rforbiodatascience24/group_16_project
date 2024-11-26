@@ -11,6 +11,7 @@ This analysis explores the relationships between OTUs, clusters derived from hie
 
 ```{r}
 library(tidyverse)
+library(broom)
 
 ```
 
@@ -158,8 +159,10 @@ otu_data_pca <- filtered_metadata_wider |>
 
 Scaling ensures that all features contribute equally to the PCA. OTU relative abundances are standardized to have zero mean and unit variance.
 
+The rotation matrix gives us a hint on the contribution of each PC to the variance of that variable.
+
 ```{r}
-otu_data_pca |>
+pca |>
   tidy(matrix = "rotation")
 ```
 
