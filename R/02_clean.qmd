@@ -166,11 +166,10 @@ As a result, we get a data frame of $N = 264,600$ !
 
 ```{r}
 # Number of OTUs before filtering
-n_total_otus <- n_distinct(metadata_df_long$OTU)
+n_total_otus <- metadata_df_long |> pull(OTU) |> n_distinct()
 
 # Number of OTUs after filtering
-n_filtered_otus <- n_distinct(filtered_metadata$OTU)
-
+n_filtered_otus <- filtered_metadata |> pull(OTU) |> n_distinct()
 # Print results
 cat("Number of OTUs before filtering:", n_total_otus, "\n")
 cat("Number of OTUs after filtering:", n_filtered_otus, "\n")
@@ -229,7 +228,7 @@ ggplot(filtered_metadata_stricter, aes(x = rel_abundance)) +
 Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
 
 ```{r}
-filtered_metadata_stricter_label <- filtered_metadata_stricter|> 
+filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
   mutate(Diet = case_when(Diet == 0 ~ "LFPP",
                           Diet == 1 ~ "Western",
                           Diet == 2 ~ "CARBR",
