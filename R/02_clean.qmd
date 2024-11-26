@@ -20,6 +20,7 @@ library(readr)
 ### 2. Read data
 
 ```{r}
+#| message: FALSE
 metadata_df <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
 head(metadata_df)
 ```
@@ -52,6 +53,7 @@ A dataset is tidy when:
 First, we will create a SampleID column.
 
 ```{r}
+#| message: FALSE
 # Creation and relocation of SampleID
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |>  # Create SampleID from the first column
@@ -113,7 +115,7 @@ otus_to_keep <- cumulative_otus |>
 filtered_metadata <- metadata_df_long |>
   filter(OTU %in% otus_to_keep)
 
-filtered_metadata
+head(filtered_metadata)
 ```
 
 As a result, we get a data frame of $N = 264,600$ !
@@ -155,7 +157,7 @@ abundance_threshold <- 1e-6
 # Apply the threshold to filter OTUs
 filtered_metadata_stricter <- filtered_metadata |>
   filter(rel_abundance >= abundance_threshold)
-filtered_metadata_stricter
+head(filtered_metadata_stricter)
 ```
 
 As a result, we get a data frame of $N = 65,938$ !

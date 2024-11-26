@@ -12132,22 +12132,17 @@ window.Quarto = {
 <span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>filtered_metadata <span class="ot">&lt;-</span> metadata_df_long <span class="sc">|&gt;</span></span>
 <span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(OTU <span class="sc">%in%</span> otus_to_keep)</span>
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>filtered_metadata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(filtered_metadata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 264,600 × 8
-   SampleID  Diet Source Donor CollectionMet   Sex OTU    rel_abundance
-      &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;         &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;dbl&gt;
- 1        1     0      0     0             0     0 OTU6        3.31e-11
- 2        1     0      0     0             0     0 OTU7        5.08e-11
- 3        1     0      0     0             0     0 OTU9        2.57e- 3
- 4        1     0      0     0             0     0 OTU41       7.95e-11
- 5        1     0      0     0             0     0 OTU58       2.53e-11
- 6        1     0      0     0             0     0 OTU77       1.28e- 3
- 7        1     0      0     0             0     0 OTU85       7.85e-11
- 8        1     0      0     0             0     0 OTU101      4.35e-11
- 9        1     0      0     0             0     0 OTU149      5.02e-11
-10        1     0      0     0             0     0 OTU155      4.49e- 3
-# ℹ 264,590 more rows</code></pre>
+<pre><code># A tibble: 6 × 8
+  SampleID  Diet Source Donor CollectionMet   Sex OTU   rel_abundance
+     &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;         &lt;int&gt; &lt;int&gt; &lt;chr&gt;         &lt;dbl&gt;
+1        1     0      0     0             0     0 OTU6       3.31e-11
+2        1     0      0     0             0     0 OTU7       5.08e-11
+3        1     0      0     0             0     0 OTU9       2.57e- 3
+4        1     0      0     0             0     0 OTU41      7.95e-11
+5        1     0      0     0             0     0 OTU58      2.53e-11
+6        1     0      0     0             0     0 OTU77      1.28e- 3</code></pre>
 </div>
 </div>
 <p>As a result, we get a data frame of <span class="math inline">\(N = 264,600\)</span> !</p>
@@ -12200,22 +12195,17 @@ window.Quarto = {
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the threshold to filter OTUs</span></span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>filtered_metadata_stricter <span class="ot">&lt;-</span> filtered_metadata <span class="sc">|&gt;</span></span>
 <span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(rel_abundance <span class="sc">&gt;=</span> abundance_threshold)</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>filtered_metadata_stricter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(filtered_metadata_stricter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 65,938 × 8
-   SampleID  Diet Source Donor CollectionMet   Sex OTU    rel_abundance
-      &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;         &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;dbl&gt;
- 1        1     0      0     0             0     0 OTU9        0.00257 
- 2        1     0      0     0             0     0 OTU77       0.00128 
- 3        1     0      0     0             0     0 OTU155      0.00449 
- 4        1     0      0     0             0     0 OTU170      0.000641
- 5        1     0      0     0             0     0 OTU336      0.000641
- 6        1     0      0     0             0     0 OTU370      0.00257 
- 7        1     0      0     0             0     0 OTU374      0.00128 
- 8        1     0      0     0             0     0 OTU596      0.000641
- 9        1     0      0     0             0     0 OTU629      0.00128 
-10        1     0      0     0             0     0 OTU675      0.00449 
-# ℹ 65,928 more rows</code></pre>
+<pre><code># A tibble: 6 × 8
+  SampleID  Diet Source Donor CollectionMet   Sex OTU    rel_abundance
+     &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;         &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;dbl&gt;
+1        1     0      0     0             0     0 OTU9        0.00257 
+2        1     0      0     0             0     0 OTU77       0.00128 
+3        1     0      0     0             0     0 OTU155      0.00449 
+4        1     0      0     0             0     0 OTU170      0.000641
+5        1     0      0     0             0     0 OTU336      0.000641
+6        1     0      0     0             0     0 OTU370      0.00257 </code></pre>
 </div>
 </div>
 <p>As a result, we get a data frame of <span class="math inline">\(N = 65,938\)</span> !</p>
