@@ -16,6 +16,8 @@ library(readr)
 
 ### 2. Download and read files
 
+We are going to access the datasets programatically from a link in Google Drive. The user has to register with their Google account in order to retrieve the data.
+
 ```{r}
 # Definition of the folder where we want the data in
 target_folder <- "../_raw"
