@@ -9,13 +9,11 @@ editor: visual
 
 ### Load packages
 
-
-    ```{r}
-    #| message: false 
-    rm(list=ls())
-    library(dplyr) 
-    ```
-
+```{r}
+#| message: false 
+rm(list=ls())
+library(dplyr) 
+```
 
 ### Read data
 
@@ -26,14 +24,12 @@ clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv',
 head(clean_df)
 ```
 
-
 ```{r}
 raw_data <- read.table('../data/01_data_metadata.tsv', 
                        header=TRUE, 
                        sep='\t')
 head(raw_data)
 ```
-
 
 ### Microbiota composition differences due to sex
 
