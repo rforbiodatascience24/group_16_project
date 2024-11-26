@@ -1,26 +1,240 @@
 ---
 title: "06_analysis_2"
+author: Konstantina Gkopi
 format: html
 editor: visual
 ---
 
-## Quarto
+### Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+This analysis explores the relationships between OTUs, clusters derived from hierarchical clustering, and donor groups. We preprocess, cluster, and visualize the data to find meaningful patterns.
 
 ```{r}
-1 + 1
-```
+library(tidyverse)
 
-You can add options to executable code like this
+```
 
 ```{r}
-#| echo: false
-2 * 2
+# Read the metadata in wide format
+filtered_metadata_wider <- read_tsv("../data/02_metadata_wide_filtered_label.tsv")
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+# Select OTU columns
+otu_data <- filtered_metadata_wider |>
+  select(starts_with("OTU"))
+
+# Check the dimensions of the OTU data
+dim(otu_data)
+
+```
+
+Standardization ensures that all OTU features are on the same scale, which is critical for clustering algorithms.
+
+```{r}
+# Scale the OTU data
+otu_data_scaled <- otu_data |> 
+  scale()
+
+# Convert scaled matrix back to tibble for tidyverse compatibility
+otu_data_scaled <- as_tibble(otu_data_scaled)
+
+```
+
+```{r}
+# Add relevant metadata (e.g., Donor)
+otu_data_with_metadata <- otu_data_scaled |>
+  mutate(Donor = filtered_metadata_wider$Donor)
+```
+
+Distance matrices are used as input for clustering algorithms. Euclidean distance measures the similarity between samples.
+
+```{r}
+# Compute Euclidean distance matrix
+dist_matrix <- otu_data_scaled |>
+  dist()
+
+```
+
+Ward's method minimizes variance within clusters.
+
+```{r}
+# Perform hierarchical clustering
+hclust_result <- hclust(dist_matrix, method = "ward.D2")
+
+```
+
+The hierarchical clustering algorithm grouped the samples based on the similarity of their OTU profiles (or microbiome composition).
+
+```{r}
+# Cut dendrogram into 3 clusters
+cluster_labels <- cutree(hclust_result, k = 3) |>
+  as_tibble() |>
+  rename(Cluster = value)
+
+# Attach cluster labels to metadata
+clustered_metadata <- filtered_metadata_wider |>
+  mutate(Cluster = as.factor(cluster_labels$Cluster))
+
+```
+
+This summary provides the distribution of donors within each cluster, allowing us to identify patterns of donor contributions.
+
+```{r}
+# Relate clusters to donor groups
+cluster_metadata_summary <- clustered_metadata |>
+  group_by(Cluster, Donor) |>
+  summarize(Count = n(), .groups = "drop") |>
+  group_by(Cluster) |>
+  mutate(Proportion = Count / sum(Count))
+
+# View the summary
+cluster_metadata_summary
+
+
+```
+
+Visualize cluster-donor relationships
+
+```{r}
+# Bar plot showing donor proportions within each cluster
+ggplot(cluster_metadata_summary, aes(x = Cluster, y = Proportion, fill = Donor)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Proportion of Donor Groups Within Clusters",
+    x = "Cluster",
+    y = "Proportion",
+    fill = "Donor"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+clustered_metadata <- clustered_metadata |>
+  mutate(Donor = case_when(
+    Donor %in% c("Human", "HMouseWestern", "CONVD" ) ~ "Other",
+    TRUE ~ Donor
+  ))
+
+```
+
+The contingency table summarizes the relationship between clusters and donor groups.
+
+```{r}
+# Create a contingency table of Donor vs. Cluster
+donor_cluster_table <- clustered_metadata |>
+  count(Cluster, Donor) |>    # Count occurrences of each Donor in each Cluster
+  pivot_wider(names_from = Donor, values_from = n, values_fill = 0) |> 
+  column_to_rownames("Cluster")  |>   # Set Cluster as row names
+  as.matrix()                       # Convert to a matrix for chisq.test
+
+# Perform Chi-Squared Test
+chi2_result <- chisq.test(donor_cluster_table)
+
+# Print results
+chi2_result
+
+```
+
+The analysis reveals distinct donor distributions across clusters. **Cluster 1** is dominated by "HMouseLFPP" and "Frozen," reflecting microbiota from plant-rich diets or preserved human samples. **Cluster 2** includes "HMouseLFPP," "HMouseWestern," and "Fresh," indicating a mix of dietary influences. **Cluster 3** is almost entirely "CONVR," representing control mice with natural microbiota. These distributions suggest strong associations between donor origins and cluster assignments, supported by the significant chi-squared result.
+
+or we can do PCA
+
+```{r}
+library(cowplot)
+```
+
+```{r}
+# Select OTU columns and scale the data
+otu_data_pca <- filtered_metadata_wider |>
+  select(starts_with("OTU")) |>
+  scale() |>
+  prcomp() #do PCA
+
+```
+
+Scaling ensures that all features contribute equally to the PCA. OTU relative abundances are standardized to have zero mean and unit variance.
+
+```{r}
+otu_data_pca |>
+  tidy(matrix = "rotation")
+```
+
+### Look at the variance explained by each PC
+
+```{r}
+otu_data_pca |>
+  tidy(matrix = "eigenvalues")
+```
+
+```{r}
+# Specify the number of top PCs to keep
+top_n <- 10
+
+# Filter to retain only the top_n principal components
+pca_variance_top <- otu_data_pca |>
+  tidy(matrix = "eigenvalues") |> 
+  filter(PC <= top_n)
+
+# Plot focusing only on the top PCs
+ggplot(pca_variance_top, aes(x = PC, y = percent)) +
+  geom_bar(stat = "identity", fill = "skyblue", alpha = 0.7, width = 0.8) +
+  geom_line(aes(y = cumulative), color = "red", size = 1.2, group = 1) +
+  geom_point(aes(y = cumulative), color = "red", size = 2) +
+  labs(
+    title = "Variance Explained by Top Principal Components",
+    x = "Principal Component",
+    y = "Percentage of Variance Explained"
+  ) +
+  scale_x_continuous(
+    breaks = 1:top_n
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+
+The first two principal components capture only a small proportion of the variance (e.g., \~13.45%). This indicates that the dataset has a highly complex or noisy structure, and the primary components fail to summarize the variability effectively. This low variance suggests PCA may not be the best approach for dimensionality reduction or summarizing the data.
+
+### Plot PC1-PC2
+
+```{r}
+otu_data_pca |>
+  augment(filtered_metadata_wider) |> # add original dataset back in
+  ggplot(aes(.fittedPC1, .fittedPC2, fill = Donor)) + 
+  facet_wrap(~Donor, scales = "free")+
+  geom_point(size = 1.5, shape = 21, color = "black") + # shape 21 supports fill aesthetic
+  scale_fill_manual(
+    values = c(
+      "CONVR" = "#D55E00",
+      "HMouseLFPP" = "#0072B2",
+      "HMouseWestern" = "#F0E442",
+      "Fresh" = "#009E73",
+      "Frozen" = "#CC79A7",
+      "Human" = "#56B4E9",
+      "CONVD" = "#E69F00"
+    )
+  ) +
+  theme_minimal() + # Replace cowplot theme
+  theme(
+    panel.grid = element_blank(), # Remove grid for cleaner appearance
+    panel.background = element_rect(fill = "white"),
+    plot.title = element_text(size = 14, face = "bold")
+  ) +
+  labs(
+    title = "PCA: PC1 vs PC2",
+    x = "Principal Component 1",
+    y = "Principal Component 2",
+    fill = "Donor"
+  )
+
+```
+
+This visualization of PCA highlights the limitations of using PCA for this dataset. The principal component scatter plots show a significant degree of overlap between donor groups, emphasizing that PCA fails to distinctly separate clusters or reveal meaningful patterns in this context. This aligns with the earlier observation that the first two principal components account for a very small percentage of the variance (\~13.45%), indicating that the variability within the dataset is not well captured by the linear dimensionality reduction method of PCA.
