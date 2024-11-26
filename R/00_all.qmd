@@ -1,11 +1,9 @@
 ---
 title: "00_all"
 author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi and Jorge Santiago
-format: html
-editor: visual
-output: 
-  html_document:
-    self-contained: true
+format:
+  html:
+    embed-resources: true
 ---
 
 # Main report

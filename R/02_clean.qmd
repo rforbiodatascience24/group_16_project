@@ -114,7 +114,7 @@ otus_to_keep <- cumulative_otus |>
 filtered_metadata <- metadata_df_long |>
   filter(OTU %in% otus_to_keep)
 
-filtered_metadata
+head(filtered_metadata)
 ```
 
 As a result, we get a data frame of $N = 264,600$ !
@@ -156,7 +156,7 @@ abundance_threshold <- 1e-6
 # Apply the threshold to filter OTUs
 filtered_metadata_stricter <- filtered_metadata |>
   filter(rel_abundance >= abundance_threshold)
-filtered_metadata_stricter
+head(filtered_metadata_stricter)
 ```
 
 As a result, we get a data frame of $N = 65,938$ !
