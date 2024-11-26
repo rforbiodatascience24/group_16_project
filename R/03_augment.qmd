@@ -11,7 +11,6 @@ editor: visual
 
 ```{r}
 #| message: false 
-#| echo: false
 rm(list=ls())
 library(tidyverse) 
 library(readr)
@@ -78,7 +77,7 @@ otu_df_modified <-  otu_df_original |>
   mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
   mutate(Class = if_else(Class == "", "Unclassified", Class))
 
-otu_df_modified
+otu_df_modified[0:5,]
 ```
 
 After that, we perform a left join to include the taxonomical information to the data frame:
