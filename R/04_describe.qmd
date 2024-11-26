@@ -110,7 +110,7 @@ For this purpose we will use the clean data.
 
 ```{r}
 clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fresh" ) |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fecal" ) |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
@@ -137,6 +137,24 @@ clean_df |>
         axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
+When comparing how the diets affect the microbiota in the different experiments one of the main differences we can see is the reduction in Bacteroidetes in the Western diet. This phenomenom is characteristic of obesity, thereby hinting at the link between this diet and said condition. As expected, the first generation ("Fresh" donor) and second generation ("HMouse..." donor) mice present different composition in their microbiota. The diet that the second generation mice follow appears to be less influential on their microbial composition than the diet that their donor followed. Furthermore, diet has the most obvious effect in the first generation of mice.
+
+### Firmicutes-Bacteroidetes Ratio
+
+We will now calculate the Firmicutes-Bacteroidetes ratio for each diet, in the first generation of humanised mice.
+
+```{r}
+ratio_data <- clean_df |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor == "Fresh" & Source != "Fecal" ) |>
+  group_by(Diet) |> 
+  summarise(Firmicutes = sum(rel_abundance[Phylum == "Firmicutes"]),
+            Bacteroidetes = sum(rel_abundance[Phylum == "Bacteroidetes"])) |> 
+  mutate(Ratio = Firmicutes / Bacteroidetes)
+ratio_data
+```
+
+As observed in the previous section, this ratio is bigger in the Western diet (less Bacteroidetes and more Firmicutes proportionately).
 
 ### Biodiversity of humanised mice microbiota with different diet
 
@@ -194,15 +212,21 @@ Finally, we plot the index for each of the studied diets.
 ```{r}
 # Plot with error bars
 ggplot(final_shannon, aes(x = Diet, y = shannon_index)) +
-  geom_col(aes(fill=Diet)) +
-  geom_errorbar(aes(ymin = shannon_index - standard_dev, ymax = shannon_index + standard_dev), width = 0.2) +  # Error bars
+  geom_col(aes(fill = Diet), width = 0.6) +  # Adjust column width
+  geom_errorbar(aes(ymin = shannon_index - standard_dev, ymax = shannon_index + standard_dev), 
+                width = 0.2) +  # Error bar width
   labs(
     title = "Biodiversity in microbiota",
     x = "Diet",
     y = "Shannon diversity index"
   ) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(
+    legend.position = "none",  # Remove legend
+    plot.title = element_text(size = 16, hjust = 0.5),  # Big centered title
+    axis.title = element_text(size = 14),  # Large axis labels
+    axis.text = element_text(size = 12)    # Large axis text
+  )
 ```
 
-Interestingly, the Western diet leads to a more biodiverse microbiota than the "healthier" LF-PP diet in the humanised mice.
+Interestingly, the Western diet leads to a more biodiverse microbiota than the "healthier" LF-PP diet in the humanised mice. This is in line with the results of representing the microbiota composition in function of phylum, in which the different type of phyla were more evenly distributed in the Western diet.
