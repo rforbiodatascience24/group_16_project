@@ -124,6 +124,22 @@ clean_df |>
 
 When comparing how the diets affect the microbiota in the different experiments one of the main differences we can see is the reduction in Bacteroidetes in the Western diet. This phenomenom is characteristic of obesity, thereby hinting at the link between this diet and said condition. As expected, the first generation ("Fresh" donor) and second generation ("HMouse..." donor) mice present different composition in their microbiota. The diet that the second generation mice follow appears to be less influential on their microbial composition than the diet that their donor followed. Furthermore, diet has the most obvious effect in the first generation of mice.
 
+### Firmicutes-Bacteroidetes Ratio
+
+We will now calculate the Firmicutes-Bacteroidetes ratio for each diet, in the first generation of humanised mice.
+
+```{r}
+ratio_data <- clean_df |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor == "Fresh" & Source != "Fecal" ) |>
+  group_by(Diet) |> 
+  summarise(Firmicutes = sum(rel_abundance[Phylum == "Firmicutes"]),
+            Bacteroidetes = sum(rel_abundance[Phylum == "Bacteroidetes"])) |> 
+  mutate(Ratio = Firmicutes / Bacteroidetes)
+ratio_data
+```
+
+As observed in the previous section, this ratio is bigger in the Western diet (less Bacteroidetes and more Firmicutes proportionately).
+
 ### Biodiversity of humanised mice microbiota with different diet
 
 We can use diversity indices in order to quantify biodiversity. As we know the relative abundance of each OTU, we can use the Shannon diversity index. Based on Claude Shannon's formula for entropy, this popular ecological metric takes into account the number of species living in a habitat (richness) and their relative abundance (evenness).
