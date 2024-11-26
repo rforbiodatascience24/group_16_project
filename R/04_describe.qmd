@@ -19,7 +19,7 @@ editor: visual
 2.  Read data
 
     ```{r}
-    clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', header=TRUE, sep='\t')
+    clean_df <- read.table('../data/02_metadata_long_filtered_label.tsv', header=TRUE, sep='\t')
     head(clean_df)
     ```
 
@@ -84,8 +84,6 @@ clean_df |>
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-If we observe the above figure we can find some interesting insights. Firstly, we can find differences in abundance among the different parts of the mice's gut
-
 ```{r}
 clean_df |> 
   filter(Diet %in% c("LFPP", "Western")) |> 
@@ -122,7 +120,7 @@ For this purpose we will use the clean data.
 
 ```{r}
 clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern")) |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fresh" ) |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
