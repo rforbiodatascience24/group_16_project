@@ -140,10 +140,17 @@ We check the distribution of OTU relative abundances to understand the range and
 
 ```{r}
 # Distribution of OTU relative abundances
-ggplot(filtered_metadata, aes(x = rel_abundance)) +
-  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+ggplot(filtered_metadata, 
+       aes(x = rel_abundance)) +
+  geom_histogram(bins = 50, 
+                 fill = "skyblue", 
+                 alpha = 0.7) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
   scale_x_log10() +
-  labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
+  labs(title = "Distribution of OTU Relative Abundances", 
+       x = "Relative Abundance (Log Scale)", 
+       y = "Frequency") +
   theme_minimal()
 
 ```
@@ -165,6 +172,8 @@ As a result, we get a data frame of $N = 65,938$ !
 # Plot the distribution of relative abundances after stricter filtering
 ggplot(filtered_metadata_stricter, aes(x = rel_abundance)) +
   geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
   scale_x_log10() +
   labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
   theme_minimal()

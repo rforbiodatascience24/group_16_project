@@ -10,6 +10,11 @@ format:
 
 This document compiles all the other Quarto documents:
 
+```{r}
+#| message: false 
+rm(list=ls())
+```
+
 ## Load data
 
 ```{r}

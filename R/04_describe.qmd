@@ -11,7 +11,6 @@ editor: visual
 
 ```{r}
 #| message: false 
-rm(list=ls())
 library(dplyr) 
 ```
 
@@ -35,12 +34,12 @@ head(raw_data)
 
 ```{r}
 clean_df |> 
-  filter(Donor == "Fresh") |> # Filter for LFPP and Western diets
-  group_by(Sex, Phylum) |> # Group by Diet and Phylum
+  filter(Donor == "Fresh") |> # Filter for Donor == Fresh
+  group_by(Sex, Phylum) |> # Group by Sex
   summarise(mean_rel_abund = mean(rel_abundance), 
             .groups = "drop") |> # Calculate mean relative abundances
   group_by(Sex) |> 
-  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each diet is 1
+  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each sex
   ggplot(aes(x = Sex,
              y = mean_rel_abund,
              fill = Phylum)) + 
@@ -57,7 +56,6 @@ clean_df |>
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, hjust = 1))
-
 
 ```
 
@@ -103,35 +101,6 @@ clean_df |>
 ```
 
 If we observe the above figure we can find some interesting insights. Firstly, we can find differences in phyla's relative abundance among the different parts of the mice's gut; but the differences are noteworthy between diet types, showing a lower abundance of *Proteobacteria* and higher *Verrucomicrobia* in Western diet compared to the LFPP diet.
-
-```{r}
-clean_df |> 
-  filter(Diet %in% c("LFPP", "Western")) |> 
-  group_by(Source, Diet) |> 
-  mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
-  group_by(Source, Diet, Class) |> 
-  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate the mean relative abundances
-  group_by(Source, Diet) |> 
-  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each one is 1
-  ggplot(aes(x = Source,
-             y = mean_rel_abund,
-             fill = Class)) + 
-  geom_bar(stat = "identity",
-           position = "stack") +
-  geom_hline(yintercept = 0) +
-  facet_wrap(~ Diet) + 
-  labs(
-    title = "Normalized Relative Abundance of Class per source and diet type",
-    x = "Source type",
-    y = "Relative Abundance (Proportion)",
-    fill = "Class"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom", # change when data augmentation has been done
-        legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
 
 ### Microbiota composition of mice with different diet and donor combination (relative abundance of phyla)
 

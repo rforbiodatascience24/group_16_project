@@ -30,7 +30,7 @@ otu_df_original <- read.table('../data/01_data_otu.tsv', header = TRUE, sep = ",
 head(otu_df_original)
 ```
 
-The different columns in the OTU data are: Domain, Phylum, Class, Order, Family, Genus and Species. Kingdom is not represented in this case.
+The different columns in the OTU data are: Domain, Phylum, Class, Order, Family, Genus and Species.
 
 ```{r}
 
@@ -47,7 +47,7 @@ The information from this OTU is the following:
 
 -   Kingdom: Bacteria
 
--   Phyllum: Actinobacteria
+-   Phylum: Actinobacteria
 
 -   Class: Actinobacteria
 
@@ -77,7 +77,7 @@ otu_df_modified <-  otu_df_original |>
   mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
   mutate(Class = if_else(Class == "", "Unclassified", Class))
 
-otu_df_modified[0:5,]
+# head(otu_df_modified)
 ```
 
 After that, we perform a left join to include the taxonomical information to the data frame:
@@ -90,5 +90,7 @@ clean_df <- clean_df |>
 ```
 
 ```{r}
-write.table(clean_df, "../data/03_metadata_long_filtered_taxonom.tsv", sep = "\t", quote = FALSE, col.names = NA)
+write.table(clean_df, "../data/03_metadata_long_filtered_taxonom.tsv", sep = "\t", 
+            quote = FALSE, 
+            col.names = NA)
 ```

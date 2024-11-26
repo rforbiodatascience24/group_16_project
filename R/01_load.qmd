@@ -28,11 +28,11 @@ if (!dir.exists(target_folder)) {
   message("Folder already exists: ", target_folder)
 }
 
-# File ID on Google Drive
+# File ID on Google Drive (more direct approach)
 file_id <- "1CW63f5yjQsfovsbEJECvi1NlxkAIEer4"
 
-# Definition of the path where it will be downloaded it
-dest_path <- file.path(target_folder, "MicrobiomeOTUtaxonomy.zip")
+# Definition of the destination path 
+dest_path <- file.path(target_folder, "Microbiome_data.zip")
 
 # Download the file into _raw
 drive_download(as_id(file_id), path = dest_path, overwrite = TRUE)
@@ -66,7 +66,7 @@ In the `otu_df` there are two types of separators (`\t` followed by `,`) in the 
 ```{r}
 otu_df <- otu_df |> 
   mutate(across(everything(), ~gsub("\t", "", .x)))
-# change columns in all dataset taken from "https://stackoverflow.com/questions/43456687/using-dplyr-gsub-on-many-columns"
+# Change columns in all dataset taken from "https://stackoverflow.com/questions/43456687/using-dplyr-gsub-on-many-columns"
 ```
 
 ### 3. Create .tsv files
