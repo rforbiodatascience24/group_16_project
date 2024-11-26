@@ -120,7 +120,7 @@ For this purpose we will use the clean data.
 
 ```{r}
 clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern")) |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fresh" ) |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
