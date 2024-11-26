@@ -1,26 +1,45 @@
 ---
-title: "00_load"
+title: "00_all"
+author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi and Jorge Santiago
 format: html
 editor: visual
+output: 
+  html_document:
+    self-contained: true
 ---
 
-## Quarto
+# Main report
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+This document compiles all the other Quarto documents:
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Load data
 
 ```{r}
-1 + 1
+#| child: "01_load.qmd"
 ```
 
-You can add options to executable code like this
+## Clean data
 
 ```{r}
-#| echo: false
-2 * 2
+#| child: "02_clean.qmd"
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Augment data
+
+```{r}
+#| child: "03_augment.qmd"
+```
+
+## Description and Visualization
+
+```{r}
+#| child: "04_describe.qmd"
+```
+
+## Analysis 1
+
+```{r}
+#| child: "05_analysis_1.qmd"
+```
+
+## Analysis 2

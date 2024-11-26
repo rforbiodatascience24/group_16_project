@@ -28,7 +28,7 @@ editor: visual
     head(raw_data)
     ```
 
-### Abundance of each OTU in samples
+### Abundance of OTUs in samples using phyla and class
 
 ```{r}
 clean_df |> 
@@ -84,7 +84,7 @@ clean_df |>
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-If we observe the above figure we can find some interesting insights. Firstly, we can find differences in abundance among the different parts of the mice's gut
+If we observe the above figure we can find some interesting insights. Firstly, we can find differences in phyla's relative abundance among the different parts of the mice's gut; but the differences are noteworthy between diet types, showing a lower abundance of *Proteobacteria* and higher *Verrucomicrobia* in Western diet compared to the LFPP diet.
 
 ```{r}
 clean_df |> 
@@ -103,7 +103,7 @@ clean_df |>
   geom_hline(yintercept = 0) +
   facet_wrap(~ Diet) + 
   labs(
-    title = "Normalized Relative Abundance of Phyla per source and diet type",
+    title = "Normalized Relative Abundance of Class per source and diet type",
     x = "Source type",
     y = "Relative Abundance (Proportion)",
     fill = "Class"
