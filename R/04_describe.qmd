@@ -7,7 +7,8 @@ editor: visual
 
 ## Data visualization and description
 
-1.  Load packages
+### Load packages
+
 
     ```{r}
     #| message: false 
@@ -15,20 +16,66 @@ editor: visual
     library(dplyr) 
     ```
 
-2.  Read data
 
-    ```{r}
-    clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', header=TRUE, sep='\t')
-    head(clean_df)
-    ```
+### Read data
 
-    ```{r}
-    #| message: false 
-    raw_data <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
-    head(raw_data)
-    ```
+```{r}
+clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', 
+                       header=TRUE, 
+                       sep='\t')
+head(clean_df)
+```
 
-### Abundance of OTUs in samples using phyla and class
+
+```{r}
+raw_data <- read.table('../data/01_data_metadata.tsv', 
+                       header=TRUE, 
+                       sep='\t')
+head(raw_data)
+```
+
+
+### Microbiota composition differences due to sex
+
+```{r}
+clean_df |> 
+  filter(Donor == "Fresh") |> # Filter for LFPP and Western diets
+  group_by(Sex, Phylum) |> # Group by Diet and Phylum
+  summarise(mean_rel_abund = mean(rel_abundance), 
+            .groups = "drop") |> # Calculate mean relative abundances
+  group_by(Sex) |> 
+  mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each diet is 1
+  ggplot(aes(x = Sex,
+             y = mean_rel_abund,
+             fill = Phylum)) + 
+  geom_bar(stat = "identity",
+           position = "stack") +
+  geom_hline(yintercept = 0) +
+  labs(
+    title = "Normalized Relative Abundance of Phyla by Sex",
+    x = "Sex",
+    y = "Relative Abundance (Proportion)",
+    fill = "Phylum"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+As seen in the plot above there are no data for female mice in the first generation, therefore we cannot draw any conclusion. We wanted to use `Donor == "Fresh"` because when examining the differences due to `Sex`, the other variables like the transplantation or diet shouldn't be considered. If we take a look to the composition of the samples:
+
+```{r}
+clean_df |> 
+  group_by(Donor, Sex) |> 
+  count(Sex)
+```
+
+There are only female mice in the humanized mouse with LFPP diet graft, and the differences in sample size are huge in comparison to male individuals. Thus, this analysis cannot be done.
+
+### Microbiota composition in terms of phyla and class in different sources and diet types
 
 ```{r}
 clean_df |> 
@@ -36,7 +83,8 @@ clean_df |>
   group_by(Source, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Source, Diet, Phylum) |> 
-  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate the mean relative abundances
+  summarise(mean_rel_abund = mean(norm_rel_abundance), 
+            .groups = "drop") |> # Calculate the mean relative abundances
   group_by(Source, Diet) |> 
   mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each one is 1
   ggplot(aes(x = Source,
@@ -86,6 +134,7 @@ clean_df |>
   theme(legend.position = "bottom", # change when data augmentation has been done
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ### Microbiota composition of mice with different diet and donor combination (relative abundance of phyla)
@@ -100,7 +149,8 @@ clean_df |>
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
-  summarise(mean_rel_abund = mean(norm_rel_abundance), .groups = "drop") |> # Calculate the mean relative abundances
+  summarise(mean_rel_abund = mean(norm_rel_abundance), 
+            .groups = "drop") |> # Calculate the mean relative abundances
   group_by(Donor, Diet) |> 
   mutate(mean_rel_abund = mean_rel_abund / sum(mean_rel_abund)) |> # Normalize mean abundances so that the total for each one is 1
   ggplot(aes(x = Donor,
@@ -120,6 +170,7 @@ clean_df |>
   theme(legend.position = "bottom", # change when data augmentation has been done
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 When comparing how the diets affect the microbiota in the different experiments one of the main differences we can see is the reduction in Bacteroidetes in the Western diet. This phenomenom is characteristic of obesity, thereby hinting at the link between this diet and said condition. As expected, the first generation ("Fresh" donor) and second generation ("HMouse..." donor) mice present different composition in their microbiota. The diet that the second generation mice follow appears to be less influential on their microbial composition than the diet that their donor followed. Furthermore, diet has the most obvious effect in the first generation of mice.
