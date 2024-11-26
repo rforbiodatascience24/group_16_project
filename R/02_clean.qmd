@@ -11,7 +11,6 @@ editor: visual
 
 ```{r}
 #| message: false 
-rm(list=ls())
 library(tidyverse) 
 library(readr)
 ```
@@ -20,26 +19,60 @@ library(readr)
 
 ```{r}
 #| message: false 
-metadata_df <- read.table('../data/01_data_metadata.tsv', header=TRUE, sep='\t')
+metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
+                          header = TRUE, 
+                          sep = '\t')
 head(metadata_df)
 ```
 
-We are going to check if there are missing values (NA):
+```{r}
+dim(metadata_df)
+```
+
+The original dataset has dimensions $N = 675$ and $M = 6702$.
+
+### 3. Data cleaning
+
+As the dataset lacks of an identifier which can act as primary key, it would be very useful to add a new column with it for the subsequent analyses:
+
+```{r}
+#| message: false 
+# Creation and relocation of SampleID
+metadata_df <- metadata_df |>
+  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
+  relocate(SampleID, 
+           .before = everything())  # Move SampleID to the first position
+head(metadata_df)
+```
+
+We first have to check if there are any missing values:
 
 ```{r}
 na_check <- anyNA(metadata_df)
 na_check
 ```
 
-Is the value relative abundance? It is, as the total value of each row is 1.
+Although it seems highly improbable (due to the large number of columns), we should also check if there duplicate rows:
 
 ```{r}
-otu_columns <- select(metadata_df, starts_with("OTU"))
+metadata_df |> 
+  group_by(SampleID) |> 
+  count(SampleID, 
+        sort = TRUE)
+```
+
+None of the rows was repeated.
+
+To really check that the values of the columns that start with OTU are relative abundances, we can check that the sum of all them has to be 1 for all the rows:
+
+```{r}
+otu_columns <- select(metadata_df, 
+                      starts_with("OTU"))
 row_sums <- rowSums(otu_columns)
 summary(row_sums)
 ```
 
-### 3. Clean data
+Columns *Data*, *Source*, *Donor*, *Collection* and *Sex* are discrete, nominal values. On the other hand, the columns that have the relative abundances of the OTUs are continuous. As all of them represent the same concept, the ranges are the same. Consequently, it is not necessary to perform data normalization.
 
 A dataset is tidy when:
 
@@ -56,7 +89,8 @@ First, we will create a SampleID column.
 # Creation and relocation of SampleID
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |>  # Create SampleID from the first column
-  relocate(SampleID, .before = everything())  # Move SampleID to the first position
+  relocate(SampleID, 
+           .before = everything())  # Move SampleID to the first position
 head(metadata_df)
 ```
 
@@ -91,13 +125,24 @@ cumulative_otus <- metadata_df_long |>
 head(cumulative_otus)
 
 # Plot cumulative contribution
-ggplot(cumulative_otus, aes(x = reorder(OTU, -mean_abundance), y = cumulative_abundance, group = 1)) +
+ggplot(cumulative_otus, 
+       aes(x = reorder(OTU, -mean_abundance), y = cumulative_abundance, group = 1)
+  ) +
   geom_line() +
-  geom_hline(yintercept = 0.95, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = 0, color = "black", linetype = "solid") +   # Add x-axis
-  geom_vline(xintercept = 0, color = "black", linetype = "solid") +   # Add y-axis
-  labs(title = "Cumulative Contribution of OTUs", x = "OTU (Ranked by Abundance)", y = "Cumulative Abundance") +  
-theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()
+  geom_hline(yintercept = 0.95, 
+             linetype = "dashed", 
+             color = "red") +
+  geom_hline(yintercept = 0, 
+             color = "black", 
+             linetype = "solid") +   # Add x-axis
+  geom_vline(xintercept = 0, 
+             color = "black", 
+             linetype = "solid") +   # Add y-axis
+  labs(title = "Cumulative Contribution of OTUs", 
+       x = "OTU (Ranked by Abundance)", 
+       y = "Cumulative Abundance") +  
+theme(axis.text.x = element_blank(), 
+      axis.ticks.x = element_blank()
 )
 
 ```
@@ -140,10 +185,16 @@ We check the distribution of OTU relative abundances to understand the range and
 
 ```{r}
 # Distribution of OTU relative abundances
-ggplot(filtered_metadata, aes(x = rel_abundance)) +
-  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+ggplot(filtered_metadata, 
+       aes(x = rel_abundance)
+  ) +
+  geom_histogram(bins = 50, 
+                 fill = "skyblue", 
+                 alpha = 0.7) +
   scale_x_log10() +
-  labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
+  labs(title = "Distribution of OTU Relative Abundances", 
+       x = "Relative Abundance (Log Scale)", 
+       y = "Frequency") +
   theme_minimal()
 
 ```
@@ -164,9 +215,13 @@ As a result, we get a data frame of $N = 65,938$ !
 ```{r}
 # Plot the distribution of relative abundances after stricter filtering
 ggplot(filtered_metadata_stricter, aes(x = rel_abundance)) +
-  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  geom_histogram(bins = 50, 
+                 fill = "skyblue", 
+                 alpha = 0.7) +
   scale_x_log10() +
-  labs(title = "Distribution of OTU Relative Abundances", x = "Relative Abundance (Log Scale)", y = "Frequency") +
+  labs(title = "Distribution of OTU Relative Abundances", 
+       x = "Relative Abundance (Log Scale)", 
+       y = "Frequency") +
   theme_minimal()
 
 ```
