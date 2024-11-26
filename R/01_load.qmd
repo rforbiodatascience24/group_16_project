@@ -16,43 +16,50 @@ library(readr)
 
 ### 2. Download and read files
 
-We are going to access the datasets programatically from a link in Google Drive. The user has to register with their Google account in order to retrieve the data.
+With the following code chunk, data is accessed programmatically from a link in Google Drive. The user has to register with their Google account in order to retrieve the data.
 
 ```{r}
-# Definition of the folder where we want the data in
-target_folder <- "../_raw"
+# Definition of the folder in which we will store the datasets
+raw_folder <- "../_raw"
 
 # Check if the folder exists; create it if not
-if (!dir.exists(target_folder)) {
-  dir.create(target_folder)
-  message("Created folder: ", target_folder)
+if (!dir.exists(raw_folder)) {
+  dir.create(raw_folder)
+  message("Created folder: ", raw_folder)
 } else {
-  message("Folder already exists: ", target_folder)
+  message("Folder already exists: ", raw_folder)
 }
 
 # File ID on Google Drive
 file_id <- "1CW63f5yjQsfovsbEJECvi1NlxkAIEer4"
 
 # Definition of the path where it will be downloaded it
-dest_path <- file.path(target_folder, "MicrobiomeOTUtaxonomy.zip")
+dest_path <- file.path(raw_folder, "MicrobiomeOTUtaxonomy.zip")
 
 # Download the file into _raw
 drive_download(as_id(file_id), path = dest_path, overwrite = TRUE)
 
 # Unzip 
-unzip(dest_path, exdir = target_folder)
+unzip(dest_path, exdir = raw_folder)
 ```
 
+We import three datasets:
+
+-   MicrobiomeWithMetadata.csv: it contains the relative abundance of the OTUs analysed per observation, as well as the conditions of the sample.
+
+-   MicrobiomeMetadataDictionary.csv: it has the equivalence between the numerical values and the conditions.
+
+-   MicrobiomeOTUtaxonomy.csv: it contains the taxonomic ranks of each analyses OTU.
+
 ```{r}
-# Load the main data file 
-raw_dir <- "../_raw" 
 data_file_metadata <- "/data_zip/MicrobiomeWithMetadata.csv" 
 data_file_dictionary <- "/data_zip/MicrobiomeMetadataDictionary.csv" 
 data_file_otu <- "/data_zip/MicrobiomeOTUtaxonomy.csv"  
 
-data_path_metadata = str_c(raw_dir,data_file_metadata) 
-data_path_dictionary = str_c(raw_dir,data_file_dictionary) 
-data_path_otu = str_c(raw_dir,data_file_otu) 
+# Definition of the pathways of the datasets.
+data_path_metadata = str_c(raw_folder, data_file_metadata) 
+data_path_dictionary = str_c(raw_folder, data_file_dictionary) 
+data_path_otu = str_c(raw_folder, data_file_otu) 
 ```
 
 ```{r}
@@ -74,16 +81,18 @@ otu_df <- otu_df |>
 ### 3. Create .tsv files
 
 ```{r}
-if (!dir.exists("../data")) {
-  dir.create("../data")
+data_folder = "../data"
+
+if (!dir.exists(data_folder)) {
+  dir.create(data_folder)
 }
 
 metadata_df |> 
-  write_tsv(file = "../data/01_data_metadata.tsv")
+  write_tsv(file = str_c(data_folder, "/01_data_metadata.tsv"))
 
 dictionary_df |> 
-  write_tsv(file = "../data/01_data_dictionary.tsv")
+  write_tsv(file = str_c(data_folder, "/01_data_dictionary.tsv"))
 
 otu_df |> 
-  write_tsv(file = "../data/01_data_otu.tsv")
+  write_tsv(file = str_c(data_folder, "/01_data_otu.tsv"))
 ```
