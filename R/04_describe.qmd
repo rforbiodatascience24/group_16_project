@@ -9,10 +9,9 @@ editor: visual
 
 ### Load packages
 
-```{{r}}
+```{r}
 #| message: false 
-rm(list=ls())
-library(dplyr) 
+library(dplyr)
 ```
 
 ### Read data
