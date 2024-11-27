@@ -1,6 +1,6 @@
 ---
 title: "05_analysis_1"
-author: Eric Torres, Lucía de Lamadrid
+author: Eric Torres, Lucía de Lamadrid, Elena Iriondo
 format: html
 editor: visual
 ---
@@ -12,7 +12,25 @@ library("ggtext")
 library("broom") 
 ```
 
-We want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
+### Firmicutes-Bacteroidetes Ratio
+
+The authorsTurnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a wel-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
+
+As an initial approach to see the "obesity-inducing" effects of this diet on the humanised mice, we will calculate the Firmicutes-Bacteroidetes ratio in first generation humanised mice (donor is "Fresh").
+
+```{r}
+ratio_data <- clean_df |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor == "Fresh" & Source != "Fecal" ) |>
+  group_by(Diet) |> 
+  summarise(Firmicutes = sum(rel_abundance[Phylum == "Firmicutes"]),
+            Bacteroidetes = sum(rel_abundance[Phylum == "Bacteroidetes"])) |> 
+  mutate(Ratio = Firmicutes / Bacteroidetes)
+ratio_data
+```
+
+As expected, the ratio is bigger in the Western diet of first generation humanised mice (less Bacteroidetes and more Firmicutes proportionately).
+
+To investigate this phenomenom more rigorously, we will develop and analyse models. Specifically, we want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
 
 First, we will filter for the two kinds of diet and the two types of phyla we are going to be working with:
 

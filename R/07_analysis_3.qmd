@@ -1,0 +1,94 @@
+---
+title: "07_analysis_3"
+author: "Elena Iriondo"
+format: html
+editor: visual
+---
+
+Load packages
+
+```{r}
+#| message: false 
+library(dplyr)
+```
+
+Read data
+
+```{r}
+clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', 
+                       header=TRUE, 
+                       sep='\t')
+head(clean_df)
+```
+
+### Biodiversity of humanised mice microbiota with different diet
+
+We can use diversity indices in order to quantify biodiversity. As we know the relative abundance of each OTU, we can use the Shannon diversity index. Based on Claude Shannon's formula for entropy, this popular ecological metric takes into account the number of species living in a habitat (richness) and their relative abundance (evenness).
+
+The formula we will use is:
+
+$$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs} $$
+
+We will compare this index for first generation humanised mice following each diet. For this purpose, we will use the original raw data, in which all OTU counts (including the less abundant ones) are included.
+
+We first store the diet column in a dataframe.
+
+```{r}
+diet_data <- raw_data |> 
+  filter(Donor == 3 & Source != 4 & Diet %in% c(0, 1)) |> #we select 1st generation humanised mice (donor is fresh), get rid of microbiota samples that were not taken at the time of sacrifice (source is not fecal), and we select the LFPP (0) and Western (1) diets
+  select(Diet) |> 
+  mutate(Diet = case_when(Diet == 0 ~ "LFPP",
+                          Diet == 1 ~ "Western"))
+```
+
+We calculate the Shannon index for each row and save it in a new dataframe.
+
+```{r}
+shannon <- raw_data |> 
+  filter(Donor == 3 & Source != 4 & Diet %in% c(0, 1)) |> #same filters as before
+  select(starts_with("OTU")) |> #we only need the OTU columns to calculate the index 
+  mutate(across(everything(), ~ (-1)*.x * log(.x))) |> #we transform each OTU relative abundance column (p_i) into p_i*log(p_i) 
+  rowwise() |> #we apply the following operations row by row
+  mutate(
+    sum_all_columns = sum(across(everything()), na.rm = TRUE), #we add the products to calculate the shannon_index
+    .keep = "unused") |> #we only keep the new shannon index column
+  ungroup()
+shannon
+```
+
+We combine both dataframes and calculate the Shannon index and its standard deviation for each diet.
+
+```{r}
+combined_df <- bind_cols(diet_data, shannon)  #combination of both dataframes
+final_shannon <- combined_df |> #generate a final data frame with the shannon index and sd for each diet
+  group_by(Diet) |>
+  summarise(
+    shannon_index= mean(sum_all_columns),
+    standard_dev = sd(sum_all_columns)
+  )
+final_shannon
+```
+
+Finally, we plot the index for each of the studied diets.
+
+```{r}
+# Plot with error bars
+ggplot(final_shannon, aes(x = Diet, y = shannon_index)) +
+  geom_col(aes(fill = Diet), width = 0.6) +  # Adjust column width
+  geom_errorbar(aes(ymin = shannon_index - standard_dev, ymax = shannon_index + standard_dev), 
+                width = 0.2) +  # Error bar width
+  labs(
+    title = "Biodiversity in microbiota",
+    x = "Diet",
+    y = "Shannon diversity index"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",  # Remove legend
+    plot.title = element_text(size = 16, hjust = 0.5),  # Big centered title
+    axis.title = element_text(size = 14),  # Large axis labels
+    axis.text = element_text(size = 12)    # Large axis text
+  )
+```
+
+Interestingly, the Western diet leads to a more biodiverse microbiota than the "healthier" LF-PP diet in the humanised mice. This is in line with the results of representing the microbiota composition in function of phylum, in which the different type of phyla were more evenly distributed in the Western diet.
