@@ -14,7 +14,7 @@ library("broom")
 
 ### Firmicutes-Bacteroidetes Ratio
 
-The authorsTurnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a wel-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
+The authors Turnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a wel-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
 
 As an initial approach to see the "obesity-inducing" effects of this diet on the humanised mice, we will calculate the Firmicutes-Bacteroidetes ratio in first generation humanised mice (donor is "Fresh").
 
@@ -35,7 +35,7 @@ To investigate this phenomenom more rigorously, we will develop and analyse mode
 First, we will filter for the two kinds of diet and the two types of phyla we are going to be working with:
 
 ```{r}
-clean_df_filtered_analysis <- 
+diet_phylum_analysis <- 
   clean_df |> 
   filter(Phylum == "Firmicutes" | Phylum == "Bacteroidetes") |>  
   filter(Diet == "LFPP" | Diet == "Western") |>  
@@ -44,14 +44,29 @@ clean_df_filtered_analysis <-
 ```
 
 ```{r}
-clean_df_filtered_nested <- clean_df_filtered_analysis |> 
+diet_phylum_count <- diet_phylum_analysis |> 
+  group_by(OTU) |> 
+  count(OTU) |> 
+  filter (n == 1) |> 
+  select(OTU)
+```
+
+```{r}
+otus_to_remove <- diet_phylum_count |> pull(OTU)
+
+diet_phylum_analysis_filtered <- diet_phylum_analysis |> 
+  filter(!OTU %in% otus_to_remove)
+```
+
+```{r}
+diet_phylum_nested <- diet_phylum_analysis_filtered |> 
   group_by(OTU) |> 
   nest() |> 
   ungroup()
 ```
 
 ```{r}
-clean_df_filtered_nested <- clean_df_filtered_nested |> 
+diet_phylum_nested <- diet_phylum_nested |> 
   group_by(OTU) |>  
   mutate(model_object = map (.x = data, 
                              .f = ~lm(formula = rel_abundance ~ Diet, 
@@ -59,7 +74,7 @@ clean_df_filtered_nested <- clean_df_filtered_nested |>
 ```
 
 ```{r}
-otus_estimate <- clean_df_filtered_nested |> 
+otus_estimate <- diet_phylum_nested |> 
   mutate(model_object_tidy = map(.x = model_object, 
                                  .f = ~tidy(.x, conf.int = TRUE, conf.level = 0.95))
   ) |>  
