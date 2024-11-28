@@ -245,7 +245,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                           Source == 7 ~ "SI15", 
                           Source == 8 ~ "SI2", 
                           Source == 9 ~ "SI5",
-                          Source == 10 ~ "CSI9", 
+                          Source == 10 ~ "SI9", 
                           Source == 11 ~ "Stomach", 
                           Source == 12 ~ "Cecum")) |> 
   mutate(Donor = case_when(Donor == 0 ~ "HMouseLFPP",
