@@ -1,6 +1,6 @@
 ---
 title: "06_analysis_2"
-author: Konstantina Gkopi
+author: Konstantina Gkopi and Elena Iriondo
 format: html
 editor: visual
 ---
