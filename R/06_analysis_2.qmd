@@ -181,8 +181,6 @@ This plot emphasizes that a few dominant phyla drive the main axes of variation 
 
 ### Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
 
-We decided to conduct hierarchical clustering because PCA, while effective at reducing dimensionality and visualizing overall variability, was not sufficient to capture distinct groupings and the relationships between donor origins and microbiota compositions. PCA provides a global overview of variation but does not explicitly group samples into discrete clusters.
-
 Hierarchical clustering, on the other hand, allowed us to group microbiota profiles into well-defined clusters based on similarity, making it easier to interpret patterns within and across donor groups. By combining this with statistical tests (e.g., chi-squared test), we could confirm the significance of the associations between donor origins and microbiota clusters, providing a more detailed understanding of the data.
 
 #### 1. Data Preparation
