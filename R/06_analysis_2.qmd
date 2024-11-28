@@ -5,13 +5,14 @@ format: html
 editor: visual
 ---
 
-### PCA Analysis on Phylum-Level Aggregated Microbiome Data
+### Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
-In this analysis, we perform PCA on microbiome data aggregated at the phylum level. We aim to identify key axes of variation and visualize sample clustering to uncover patterns in microbial community composition.
+In this section, we perform PCA on microbiome data aggregated at the phylum level. We aim to identify key axes of variation and visualize sample clustering to uncover patterns in microbial community composition. To reduce the complexity of the data, we will work solely on first generation humanised mice, studying how diet and microbiota composition at the phylum level structures the data.
 
 #### 1. **Load libraries**
 
 ```{r}
+#| message: false 
 library(tidyverse)
 library(broom)
 library(ggrepel)
@@ -30,17 +31,19 @@ head(clean_df)
 
 #### 3. Prepare data for PCA
 
-To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. We then reshape the data into a wide format suitable for PCA analysis.
+To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanised mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
 
 ```{r}
 # Aggregate relative abundances by phylum
-aggregated_data <- clean_df |> 
-  group_by(SampleID, Donor, Phylum) |> 
+aggregated_data <- clean_df |>
+  filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
+  group_by(SampleID, Phylum, Diet) |> 
   summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
 
-# Pivot wider to prepare for PCA (SampleID by Phylum)
+# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
 aggregated_wide <- aggregated_data |> 
-  pivot_wider(names_from = Phylum, values_from = rel_abundance, values_fill = 0)
+  pivot_wider(names_from = Phylum, values_from = rel_abundance, values_fill = 0) |> 
+  mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
 
 # Check of the aggregated data
 head(aggregated_wide)
@@ -53,7 +56,7 @@ Using the aggregated data, we scale the phylum-level abundances and apply PCA. T
 ```{r}
 # Scale the aggregated data and perform PCA
 otu_data_pca <- aggregated_wide |> 
-  select(-SampleID, -Donor) |> 
+  select(-SampleID) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
   scale() |> 
   prcomp()
 ```
@@ -87,55 +90,45 @@ ggplot(pca_variance, aes(x = PC, y = percent)) +
     plot.title = element_text(hjust = 0.5, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1),
     panel.grid.major = element_blank()
-  )
+  ) +
+  geom_hline(yintercept = 0.9, linetype = "dashed", size = 0.5) + # Add line at 90% variance explained
+  annotate("text", x = 3.5, y = 0.95, label = "90%", size = 5, hjust = 0) #we add an annotation with the 90%
 ```
 
-The PCA variance table shows that PC1 and PC2 together explain 44.07% of the total variance, with PC1 accounting for 26.23% and PC2 for 17.84%. Including PC3 increases the cumulative explained variance to 59.61%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by donor origin, diet, and phylum-level differences.
+The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
 
 #### 6. **Visualizing PC1 vs PC2**
 
-We plot the first two principal components (PC1 and PC2) to visualize the differences between donors.
+We plot the first two principal components (PC1 and PC2) to visualize the differences between diets.
 
 ```{r}
-# Visualize PC1 VS PC2
 otu_data_pca |> 
   augment(aggregated_wide) |> 
-  ggplot(aes(.fittedPC1, .fittedPC2, fill = Donor)) +
-  geom_point(size = 1.5, shape = 21) +
-  scale_fill_brewer(palette = "Dark2") +
+  ggplot(aes(.fittedPC1, .fittedPC2, fill = factor(Diet))) +  # Map fill to factor
+  geom_point(size = 3, shape = 21) +                          # Adjust point size and shape
+  scale_fill_manual(                                         # Manually define colors and labels
+    values = c("0" = "light green", "1" = "pink"),                   # Assign colors to Diet levels
+    name = "Diet",                                           # Legend title
+    labels = c("LFPP", "Western")                    # Legend labels
+  ) +
   labs(
-    title = "PCA: PC1 vs PC2 by Donor Group",
+    title = "PCA: PC1 vs PC2 by Diet",
     x = "Principal Component 1",
     y = "Principal Component 2"
   ) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank()
+    panel.grid.major = element_blank(),
+    legend.position = "right"     
   )
+
 ```
 
-```{r}
-# Visualize PC1 VS PC2
-otu_data_pca |> 
-  augment(aggregated_wide) |> 
-  ggplot(aes(.fittedPC1, .fittedPC2, fill = Donor)) +
-  geom_point(size = 1.5, shape = 21) +
-  facet_wrap(~ Donor) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(
-    title = "PCA: PC1 vs PC2 by Donor Group",
-    x = "Principal Component 1",
-    y = "Principal Component 2"
-  ) +
-  theme_minimal() +
-  theme(
-    panel.grid.major = element_blank()
-  )
-```
+The plot shows clear clustering according to diet, with observations of the LFPP diet accumulating on the lower right corner of the grid.
 
 #### 7. **Understanding contributions to PC1 and PC2**
 
-The contributions of individual phyla to the first two principal components are analyzed to identify key taxa driving variation in the data. This provides biological insights into which phyla influence microbiome differences.
+Now, we will represent the individual contributions of each variable to the first two principal components. Analysing the contributions of individual phyla to the first two principal components can allow us to identify key taxa driving variation in the data. This provides biological insights into which phyla influence microbiome differences.
 
 ```{r}
 # Define arrow style for plotting
@@ -156,7 +149,7 @@ ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
   scale_color_brewer(palette = "Dark2") +
   geom_text_repel(aes(label = column), size = 3, hjust = 1) +
   labs(
-    title = "Contributions of Phyla to PC1 and PC2",
+    title = "Contributions of Phyla and Diet to PC1 and PC2",
     x = "PC1 Contributions",
     y = "PC2 Contributions",
     color = "Phylum"
@@ -172,7 +165,19 @@ ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
   )
 ```
 
-The biplot illustrates the contributions of different phyla to the first two principal components (PC1 and PC2). **Bacteroidetes** and **Firmicutes** contribute strongly to PC1 in opposite directions, highlighting their contrasting roles in shaping microbiota variability. **Verrucomicrobia** and **Unclassified** taxa influence PC2 significantly, reflecting unique microbial variability in specific groups. Minor contributions from **Proteobacteria**, **Actinobacteria**, and **TM7** suggest their subtler impact on overall microbiota structure. This plot emphasizes that a few dominant phyla drive the main axes of variation in microbial communities.
+The biplot illustrates the contributions of the variables to the first two principal components (PC1 and PC2). From this, we can extract several conclusions:
+
+-   Western diet (Diet=1) correlates with a negative PC1 coordinate, which is in line with Western diet observations being found on the left of the previous scatter plot. It also contributes to PC2, but to a lower extent.
+
+-   **Unclassified** phyla present an opposite behavior to the diet variable. This is in line with the barplots presented in the description section, which showed more OTUs from unclassified phyla could be found in the LFPP diet.
+
+-   **Bacteroidetes** and **Firmicutes** also exhibit opposite behaviors, consistent with their biological significance. As explained in other sections, the ratio of Firmicutes to Bacteroidetes serves as a well-established marker for obesity.
+
+-   **Verrucomicrobia** and **Proteobacteria** cluster together, contributing to PC2.
+
+-   The **Actinobacteria** vector has the same direction as Firmicutes, but is of a much smaller magnitude. This is due to the fact that the relative abundance of OTUs belonging to this phylum varies less.
+
+This plot emphasizes that a few dominant phyla drive the main axes of variation in microbial communities, underscoring the importance of these phyla in shaping the microbial composition and potentially influencing host health outcomes.
 
 ### Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
 
