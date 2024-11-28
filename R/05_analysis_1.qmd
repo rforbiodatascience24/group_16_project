@@ -14,7 +14,7 @@ library("broom")
 
 ### Firmicutes-Bacteroidetes Ratio
 
-The authors Turnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a wel-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
+The authors Turnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a well-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
 
 As an initial approach to see the "obesity-inducing" effects of this diet on the humanised mice, we will calculate the Firmicutes-Bacteroidetes ratio in first generation humanised mice (donor is "Fresh").
 
@@ -90,5 +90,16 @@ otus_estimate <- diet_phylum_nested |>
       q.value < 0.05 ~ "yes"
       )
   )
+```
 
+```{r}
+otus_test <- otus_estimate |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  relocate(Phylum, Class, .after = OTU) |> 
+  filter(is_significant == "yes") 
+```
+
+```{r}
+65/19
 ```
