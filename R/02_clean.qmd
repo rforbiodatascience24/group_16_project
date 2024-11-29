@@ -18,10 +18,11 @@ library(readr)
 ### 2. Read data
 
 ```{r}
-metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
-                          header = TRUE, 
-                          sep = '\t')
-#head(metadata_df)
+# Read the data
+metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
+
+# Check the structure of the data
+head(metadata_df)
 ```
 
 ```{r}
@@ -81,15 +82,6 @@ A dataset is tidy when:
 -   Each value is a cell
 
 First, we will create a SampleID column.
-
-```{r}
-# Creation and relocation of SampleID
-metadata_df <- metadata_df |>
-  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
-  relocate(SampleID, 
-           .before = everything())  # Move SampleID to the first position
-#head(metadata_df)
-```
 
 In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
@@ -256,7 +248,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                                    CollectionMet == 1 ~ "Scraping")) |> 
   mutate(Sex = case_when(Sex == 0 ~ "Male",
                          Sex == 1 ~ "Female")) 
-#head(filtered_metadata_stricter_label)
+head(filtered_metadata_stricter_label)
 ```
 
 Wide format

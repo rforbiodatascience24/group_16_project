@@ -1,24 +1,166 @@
 ---
-title: "presentation"
-format: revealjs
+title: "Impact of Dietary Shifts on Gut Microbiome Dynamics"
+subtitle: "Multivariate Insights Using R"
+author: "Group 16: Eric Torres, Lucia de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago"
+date: December 3, 2024
+course: R for Bio Data Analysis
+format:
+  revealjs:
+    width: 1600   
+    height: 800 
+    embed-resources: true
+    theme: night
+    template-partials:
+      - title-slide.html
 editor: visual
 ---
 
-## Quarto
+# Introduction
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+## Objective and Main Research Questions
 
-## Bullets
+#### Objective:
 
-When you click the **Render** button a document will be generated that includes:
+\-
 
--   Content authored with markdown
--   Output from executable code
+#### Research Questions:
 
-## Code
+1\.
 
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+2\.
+
+## Data Loading
+
+::: {style="font-size: 22px;"}
+-   **MicrobiomeWithMetadata.csv** (Main dataset):\
+    Contains the relative abundance of OTUs analyzed per observation, along with the conditions of each sample (e.g., diet, sex, etc.).
+
+    ```{r}
+    #| message: false 
+    #| echo: true
+    library(tidyverse) 
+    # Read the data
+    metadata_df <- read_tsv(file = str_c('../data/01_data_metadata.tsv'))
+
+    # Check the structure of the data
+    head(metadata_df)
+    ```
+
+-   **MicrobiomeMetadataDictionary.csv** (Complementary):\
+    Provides the equivalence between numerical values and their corresponding sample conditions.
+
+-   **MicrobiomeOTUtaxonomy.csv** (Complementary):\
+    Contains the taxonomic classification of each OTU analyzed.
+
+-   **Source:**\
+    [Explore Microbiome Dataset](https://www.exploredata.net/Downloads/Microbiome-Data-Set)\
+    Curated version of the microbiome dataset from Turnbaugh et al. (original publication available in accompanying files).
+:::
+
+# Materials and Methods
+
+## Data Tidying and Filtering
+
+<div style="font-size: 20px;">
+
+-   Added a `SampleID` column to uniquely identify each sample + Transformed the dataset from **wide** to **long** format for easier analysis.
 
 ```{r}
-1 + 1
+#| echo: true
+#| output-location: column
+
+# Creation and relocation of SampleID
+metadata_df <- metadata_df |>
+  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
+  relocate(SampleID, 
+           .before = everything())  # Move SampleID to the first position
+
+metadata_df_long <- metadata_df |> 
+  pivot_longer(
+    cols = starts_with("OTU"), 
+    names_to = "OTU", 
+    values_to = "rel_abundance"
+  )
+head(metadata_df_long)
+```
+
+-   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance** to remove low-abundance and negligible contributors. Additionally, removed OTUs with extremely low relative abundances.
+
+-   Replace the numeric codes with descriptive labels.
+
+</div>
+
+::: columns
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
+# Calculate cumulative contribution
+cumulative_otus <- metadata_df_long |>
+  group_by(OTU) |>
+  summarize(mean_abundance = mean(rel_abundance)) |>
+  arrange(desc(mean_abundance)) |>
+  mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
+# Filter OTUs contributing to 95% cumulative abundance
+otus_to_keep <- cumulative_otus |>
+  filter(cumulative_abundance <= 0.95) |>
+  pull(OTU)
+# Filter the metadata to retain only these OTUs
+filtered_metadata <- metadata_df_long |>
+  filter(OTU %in% otus_to_keep)
+dim(filtered_metadata)
+# Set the stricter abundance threshold
+abundance_threshold <- 1e-6
+# Apply the threshold to filter OTUs
+filtered_metadata_stricter <- filtered_metadata |>
+  filter(rel_abundance >= abundance_threshold)
+dim(filtered_metadata_stricter)
+
+
+
+```
+:::
+
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
+filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
+  mutate(Diet = case_when(Diet == 0 ~ "LFPP",
+                          Diet == 1 ~ "Western",
+                          Diet == 2 ~ "CARBR",
+                          Diet == 3 ~ "FATR",
+                          Diet == 4 ~ "Suckling",
+                          Diet == 5 ~ "Human")) |> 
+  mutate(Source = case_when(Source == 0 ~ "Cecum1",
+                          Source == 1 ~ "Cecum2", 
+                          Source == 2 ~ "Colon1", 
+                          Source == 3 ~ "Colon2", 
+                          Source == 4 ~ "Feces",
+                          Source == 5 ~ "SI1",
+                          Source == 6 ~ "SI13", 
+                          Source == 7 ~ "SI15", 
+                          Source == 8 ~ "SI2", 
+                          Source == 9 ~ "SI5",
+                          Source == 10 ~ "SI9", 
+                          Source == 11 ~ "Stomach", 
+                          Source == 12 ~ "Cecum")) |> 
+  mutate(Donor = case_when(Donor == 0 ~ "HMouseLFPP",
+                          Donor == 1 ~ "CONVR", 
+                          Donor == 2 ~ "Human", 
+                          Donor == 3 ~ "Fresh", 
+                          Donor == 4 ~ "Frozen",
+                          Donor == 5 ~ "HMouseWestern", 
+                          Donor == 6 ~ "CONVD")) |> 
+  mutate(CollectionMet = case_when(CollectionMet == 0 ~ "Contents",
+                                   CollectionMet == 1 ~ "Scraping")) |> 
+  mutate(Sex = case_when(Sex == 0 ~ "Male",
+                         Sex == 1 ~ "Female")) 
+```
+:::
+:::
+
+## Our tidy data set!
+
+```{r}
+#| echo: true
+head(filtered_metadata_stricter_label)
 ```
