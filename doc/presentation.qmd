@@ -61,8 +61,7 @@ editor: visual
 
 ## Data Tidying and Filtering
 
-<div style="font-size: 20px;">
-
+::: {style="font-size: 20px;"}
 -   Added a `SampleID` column to uniquely identify each sample + Transformed the dataset from **wide** to **long** format for easier analysis.
 
 ```{r}
@@ -87,8 +86,7 @@ head(metadata_df_long)
 -   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance** to remove low-abundance and negligible contributors. Additionally, removed OTUs with extremely low relative abundances.
 
 -   Replace the numeric codes with descriptive labels.
-
-</div>
+:::
 
 ::: columns
 ::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
@@ -158,9 +156,24 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
 :::
 :::
 
-## Our tidy data set!
+## Our tidy data set...ready to be augmented!
 
+We will use the OTUs taxonomy file to add columns with the names of phylum and class for each OTU.
+
+::: columns
+::: {.column width="50%" style="font-size: 22px;"}
 ```{r}
 #| echo: true
 head(filtered_metadata_stricter_label)
 ```
+:::
+
+::: {.column width="50%" style="font-size: 22px;"}
+```{r}
+#| echo: true
+otu_df_original <- read_csv('../data/01_data_otu.tsv')
+head(otu_df_original)
+head(otu_df_original)
+```
+:::
+:::
