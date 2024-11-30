@@ -4,13 +4,13 @@ This repository includes the analysis of data wrangling and visualization of a d
 
 ## Project Contributors
 
-| Family name | First name | student ID |
-|----------|----------|----------|
-| De Lamadrid Ordóñez | Lucía | s243311 |
-| Gkopi | Konstantina | s243692 |
-| Iriondo Delgado | Elena | s243312 |
-| Satiago Bajo | Jorge | s243310 |
-| Torres García | Eric | s243275 |
+| Family name | First name | GitHub username | student ID |
+|----------|----------|----------|----------|
+| De Lamadrid Ordóñez | Lucía | luciadelama | s243311 |
+| Gkopi | Konstantina | KonstantinaGkopi | s243692 |
+| Iriondo Delgado | Elena | elena-iridel | s243312 |
+| Satiago Bajo | Jorge | jorgeesant | s243310 |
+| Torres García | Eric | EricTorresBT | s243275 |
 
 ## Data retrieval 
 The dataset is available in the following link: https://www.exploredata.net/Downloads/Microbiome-Data-Set. In particular, we work with the files MicrobiomeWithMetadata.csv as well as the glossary and the dictionary. 
