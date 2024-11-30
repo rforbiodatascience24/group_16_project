@@ -247,8 +247,8 @@ aggregated_data <- clean_df_augm |>
 
 # Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
 aggregated_wide <- aggregated_data |> 
-  pivot_wider(names_from = Phylum, values_from = rel_abundance, values_fill = 0) |> 
-  mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
+  pivot_wider(names_from = Phylum, values_from = rel_abundance) |> 
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1)) #pca uses numerical values so we modify the diet column
 
 # Check of the aggregated data
 head(aggregated_wide)
