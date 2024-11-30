@@ -15,7 +15,7 @@ This repository includes the analysis of data wrangling and visualization of a d
 ## Data retrieval 
 The dataset is available in the following link: https://www.exploredata.net/Downloads/Microbiome-Data-Set. In particular, we work with the files MicrobiomeWithMetadata.csv as well as the glossary and the dictionary. 
 
-... In progres ... 
+The data can be retrieved programatically when executing the code, from a file ID on Google Drive. The user needs to register to Google Drive with a valid account. 
 
 ## Navigation through this directory 
 * [R](https://github.com/rforbiodatascience24/group_16_project/tree/main/R): this folder contains the scripts for data loading, cleanig, augmentation, description and analysis. 
