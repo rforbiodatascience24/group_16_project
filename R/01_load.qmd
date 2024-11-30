@@ -11,6 +11,7 @@ editor: visual
 
 ```{r}
 #| message: false 
+rm(list=ls())
 library(tidyverse) 
 library(googledrive)
 library(readr)
