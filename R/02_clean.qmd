@@ -18,10 +18,10 @@ library(readr)
 ### 2. Read data
 
 ```{r}
-#| message: false 
-metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
-                          header = TRUE, 
-                          sep = '\t')
+# Read the data
+metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
+
+# Check the structure of the data
 head(metadata_df)
 ```
 
@@ -40,13 +40,13 @@ The original dataset has dimensions $N = 675$ and $M = 6702$.
 As the dataset lacks of an identifier which can act as primary key, we introduce a numeric surrogate key using the row number (SampleID):
 
 ```{r}
-#| message: false 
 
+#| message: false 
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |> 
   relocate(SampleID, 
            .before = everything())  # Move SampleID to the first position
-head(metadata_df)
+#head(metadata_df)
 ```
 
 We check the existence of missing values:
@@ -86,6 +86,7 @@ A dataset is tidy when:
 -   Each observation is a row
 
 -   Each value is a cell
+
 
 In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are in reality one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
@@ -236,7 +237,6 @@ ggplot(
        y = "Frequency") +
   theme_minimal() + 
   theme(plot.title = element_text(hjust = 0.5))
-
 ```
 
 Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the equivalences provided by the dictionary dataframe:
@@ -259,7 +259,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                           Source == 7 ~ "SI15", 
                           Source == 8 ~ "SI2", 
                           Source == 9 ~ "SI5",
-                          Source == 10 ~ "CSI9", 
+                          Source == 10 ~ "SI9", 
                           Source == 11 ~ "Stomach", 
                           Source == 12 ~ "Cecum")) |> 
   mutate(Donor = case_when(Donor == 0 ~ "HMouseLFPP",
@@ -284,8 +284,7 @@ filtered_metadata_wider <- filtered_metadata_stricter_label |>
     names_from = OTU,               
     values_from = rel_abundance,    
   )
-
-
+  
 head(filtered_metadata_wider)
 ```
 
