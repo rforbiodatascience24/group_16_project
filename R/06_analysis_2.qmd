@@ -208,14 +208,15 @@ For this analysis we will use the 02_metadata_wide_filtered_label.tsv" data fram
 
 ```{r}
 # Read the metadata in wide format
-filtered_metadata_wider <- read_tsv("../data/02_metadata_wide_filtered_label.tsv")
-
+filtered_metadata_wider <- read_tsv(
+  "../data/02_metadata_wide_filtered_label.tsv")
+  
 # Select OTU columns
 otu_data <- filtered_metadata_wider |>
   select(starts_with("OTU"))
 
 # Check the dimensions of the OTU data
-dim(otu_data)
+head(otu_data)
 
 ```
 
@@ -300,6 +301,7 @@ clusters <- ggplot(cluster_metadata_summary, aes(x = Cluster, y = Proportion, fi
     fill = "Donor"
   ) +
   theme_minimal()
+clusters
 ggsave("../results/clusters.png", plot = clusters, width = 8, height = 6, units = "in", bg = "white")
 ```
 
