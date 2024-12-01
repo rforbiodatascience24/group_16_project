@@ -12,6 +12,11 @@ editor: visual
 ```{r}
 #| message: false 
 library("tidyverse")
+library("ggthemes")
+```
+
+```{r}
+palette.pals()
 ```
 
 ### Read data
@@ -38,15 +43,17 @@ clean_df |>
            position = "stack") +
   geom_hline(yintercept = 0) +
   labs(
-    title = "Relative Abundance of Phyla by Sex",
+    title = "Relative abundance of phyla by sex",
     x = "Sex",
     y = "Relative Abundance",
     fill = "Phylum"
-  ) +
+  ) + 
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
 
 ```
@@ -56,7 +63,7 @@ As seen in the plot above there are no data for female mice in the first generat
 ```{r}
 clean_df |> 
   group_by(Donor, Sex) |> 
-  count(Sex)
+  summarise(count = n())
 ```
 
 There are only female mice in the humanized mouse with LFPP diet graft, and the differences in sample size are huge in comparison to male individuals. Thus, this analysis cannot be done.
@@ -82,16 +89,18 @@ plot1 <- clean_df |>
   geom_hline(yintercept = 0) +
   facet_wrap(~ Diet) + 
   labs(
-    title = "Relative Abundance of Phyla per source and diet type",
+    title = "Relative abundance of phyla per source and diet type",
     x = "Source type",
     y = "Relative Abundance",
     fill = "Phyla"
   ) +
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom", # change when data augmentation has been done
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, 
-                                   hjust = 1))
+                                   hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
 ggsave("../results/rel_abund_phyla_source_diet.png", 
        plot = plot1, 
@@ -103,15 +112,17 @@ ggsave("../results/rel_abund_phyla_source_diet.png",
 plot1
 ```
 
-This plots represents the differences in microbiome phyla (in terms of relative abundance) found among different parts of the gut and feces in two different diets: LFFP and Western diet. Simply by observing the figure we can obtain valuable insights.
+Note: SIX makes reference to different sections of the small intestine.
 
-Firstly, we can find differences in phyla's relative abundance among the different parts of the mice's gut. However, the differences are noteworthy between diet types, showing a lower abundance of *Proteobacteria* and higher *Verrucomicrobia* in Western diet compared to the LFPP diet.
+This plots represents the differences in microbiome phyla (in terms of relative abundance) found among different parts of the gut and feces in two different diets: LFFP and Western diet. Simply by observing the figure we can obtain valuable insights:
 
-Another noteworthy observation is that in mice following an LFFP diet the *Firmicutes* abundance is more or less constant along the different sections of the gut, whereas in the Western diet there is a lower proportion in Cecum samples than in the SI samples.
+Firstly, we can find differences in the phyla's relative abundance among the different parts of the mice's gut. However, the differences are noteworthy between diet types, showing a *generally* lower relative abundance of *Proteobacteria* and higher *Verrucomicrobia* in Western diet compared to the LFPP diet.
+
+Another interesting observation is that in mice following an LFFP diet the *Firmicutes* abundance is more or less constant along the different sections of the gut, whereas in the Western diet there is a lower proportion in Cecum samples than in the SI samples.
 
 These differences in relative abundance indicate a modulation of the microbiome by the diet type, and of course, it could have consequences on health. It would be interesting to analyse how this differential abundance could impact for example obesity risk, and also find out if there are some parts of the gut that have greater relevance in determining that risk.
 
-### Microbiota composition of mice with different diet and donor combination (relative abundance of phyla)
+### Microbiota composition of mice with different diet and donor combination
 
 In order to compare the general composition of the microbiota in the mice with different donor and diet, we may represent the relative abundance of the most prevalent phyla.
 
@@ -133,15 +144,17 @@ plot2 <- clean_df |>
   geom_hline(yintercept = 0) +
   facet_wrap(~ Diet) + 
   labs(
-    title = "Relative Abundance of Phyla per donor and diet type",
+    title = "Relative abundance of phyla per donor and diet type",
     x = "Donor type",
     y = "Relative Abundance",
     fill = "Phylum"
   ) +
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
 
 ggsave("../results/rel_abund_diet_donor_comb.png", 
        plot = plot2, 
