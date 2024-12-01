@@ -19,25 +19,19 @@ editor: visual
 
 # Introduction
 
-## Objective and Main Research Questions
+::: columns
+::: {.column width="50%"}
+![](images/article_title.png)
 
-![](./images/article_title.png){.absolute top="200" left="0" width="1200" height="400"}
-
--   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
-
--   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
-
-Our aim:
+*Our aim:*
 
 To study the relationship between the composition of the gut microbiota and factors such as diet and colonisation history.
+:::
 
-#### Main Research Questions:
-
--   **Modelling** of the **Firmicutes-Bacteroidetes ratio**
-
--   Deciphering key **factors** shaping **ecosystem composition** through **PCA** and **clustering** analysis
-
--   Evalauting the effect of **diet** in the **microbial biodiversity**
+::: {.column width="50%"}
+![](images/experiments.png)
+:::
+:::
 
 ## Data Loading
 
@@ -322,7 +316,29 @@ clustered_metadata <- filtered_metadata_wider |>
 :::
 :::
 
-## 07
+## Biodiversity and diet
+
+::: columns
+::: {.column width="50%"}
+
+**Shannon diversity index**
+
+-   Number of species living in a habitat (**richness**)
+
+```{=html}
+<!-- -->
+```
+-   Relative abundance (**evenness**).
+
+$$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs} $$
+:::
+
+::: {.column width="50%"}
+![](images/shannon-01.png)
+
+**Biodiversity** in the microbiota of first-generation humanized mice was found to differ **significantly** across different **diets**.
+:::
+:::
 
 ## Discussion
 
