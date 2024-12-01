@@ -280,10 +280,10 @@ Some subsequent analyses will require us to use a wide dataset:
 ```{r}
 filtered_metadata_wider <- filtered_metadata_stricter_label |> 
   pivot_wider(
-    names_from = OTU,               
-    values_from = rel_abundance,    
+    names_from = OTU,
+    values_from = rel_abundance
   )
-  
+
 head(filtered_metadata_wider)
 ```
 
@@ -304,10 +304,8 @@ write.table(
   quote = FALSE
 )
 
-write.table(
+write_tsv(
   filtered_metadata_wider, 
-  "../data/02_metadata_wide_filtered_label.tsv", 
-  sep = "\t", 
-  quote = FALSE
+  "../data/02_metadata_wide_filtered_label.tsv"
 )
 ```
