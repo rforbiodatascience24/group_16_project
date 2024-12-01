@@ -5,18 +5,32 @@ format: html
 editor: visual
 ---
 
+### 1. Load packages
+
 ```{r}
+#| message: false 
 library("tidyverse")
 library("ggrepel")
 library("ggtext")
 library("broom") 
 ```
 
-### Firmicutes-Bacteroidetes Ratio
+### 2. Read data
 
-The authors Turnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a wel-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
+```{r}
+clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', 
+                       header=TRUE, 
+                       sep='\t')
+head(clean_df)
+```
 
-As an initial approach to see the "obesity-inducing" effects of this diet on the humanised mice, we will calculate the Firmicutes-Bacteroidetes ratio in first generation humanised mice (donor is "Fresh").
+### 3. Analysis
+
+#### Firmicutes-Bacteroidetes Ratio
+
+The authors Turnbaugh *et al.* attempt to induce obesity in the mice by providing a Western diet. Both weight and body fat were quantified to measure this condition. However, this data was not provided, so we must resort to other indirect measures of obesity. One of these is the Firmicutes-Bacteroidetes ratio, a well-known biomarker for obesity (<https://doi.org/10.1038/4441022a>).
+
+As an initial approach to see the "obesity-inducing" effects of this diet on the humanized mice, we will calculate the Firmicutes-Bacteroidetes ratio in first generation humanized mice (donor is "Fresh").
 
 ```{r}
 ratio_data <- clean_df |> 
@@ -25,17 +39,18 @@ ratio_data <- clean_df |>
   summarise(Firmicutes = sum(rel_abundance[Phylum == "Firmicutes"]),
             Bacteroidetes = sum(rel_abundance[Phylum == "Bacteroidetes"])) |> 
   mutate(Ratio = Firmicutes / Bacteroidetes)
+
 ratio_data
 ```
 
-As expected, the ratio is bigger in the Western diet of first generation humanised mice (less Bacteroidetes and more Firmicutes proportionately).
+As expected, the ratio is bigger in the Western diet of first generation humanized mice (less Bacteroidetes and more Firmicutes proportionately).
 
-To investigate this phenomenom more rigorously, we will develop and analyse models. Specifically, we want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
+To investigate this phenomenon more rigorously, we will develop and analyse models. Specifically, we want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
 
-First, we will filter for the two kinds of diet and the two types of phyla we are going to be working with:
+First, we will filter for the two types of diets and the two phyla we will be working with:
 
 ```{r}
-diet_phylum_analysis <- 
+diet_phylum <- 
   clean_df |> 
   filter(Phylum == "Firmicutes" | Phylum == "Bacteroidetes") |>  
   filter(Diet == "LFPP" | Diet == "Western") |>  
@@ -43,8 +58,10 @@ diet_phylum_analysis <-
                          Diet == "Western" ~ 1))
 ```
 
+In order to perform the model estimation, we first need to filter out variables that have only one value. This is necessary because these variables cause errors during the modeling process, as they lack variability required for proper statistical analysis.
+
 ```{r}
-diet_phylum_count <- diet_phylum_analysis |> 
+diet_phylum_count <- diet_phylum |> 
   group_by(OTU) |> 
   count(OTU) |> 
   filter (n == 1) |> 
@@ -52,18 +69,21 @@ diet_phylum_count <- diet_phylum_analysis |>
 ```
 
 ```{r}
-otus_to_remove <- diet_phylum_count |> pull(OTU)
+otus_to_remove <- diet_phylum_count |> 
+  pull(OTU)
 
-diet_phylum_analysis_filtered <- diet_phylum_analysis |> 
+diet_phylum_filtered <- diet_phylum |> 
   filter(!OTU %in% otus_to_remove)
 ```
 
 ```{r}
-diet_phylum_nested <- diet_phylum_analysis_filtered |> 
+diet_phylum_nested <- diet_phylum_filtered |> 
   group_by(OTU) |> 
   nest() |> 
   ungroup()
 ```
+
+To identify which OTUs are significantly associated with diet, a linear model is fitted for each OTU to assess the relationship between relative abundance and diet.
 
 ```{r}
 diet_phylum_nested <- diet_phylum_nested |> 
@@ -72,6 +92,8 @@ diet_phylum_nested <- diet_phylum_nested |>
                              .f = ~lm(formula = rel_abundance ~ Diet, 
                                       data = .x)))
 ```
+
+The model results are tidied to extract relevant estimates, including p-values and confidence intervals. Afterward, p-values are adjusted for multiple testing, and OTUs with significant associations to diet are identified based on a threshold (q-value \< 0.05).
 
 ```{r}
 otus_estimate <- diet_phylum_nested |> 
@@ -90,5 +112,112 @@ otus_estimate <- diet_phylum_nested |>
       q.value < 0.05 ~ "yes"
       )
   )
-
 ```
+
+```{r}
+otus_test <- otus_estimate |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  relocate(Phylum, Class, .after = OTU) |> 
+  filter(is_significant == "yes") 
+```
+
+This process allows us to select OTUs whose relative abundance significantly changes between the two dietary groups, resulting in the selection of 84 OTUs.
+
+```{r}
+filtered_diet <- diet_phylum_analysis |> 
+  filter(Diet == 1) |> 
+  distinct(OTU, .keep_all = TRUE) |> 
+  select(Diet, OTU)
+```
+
+```{r}
+otus_test |> 
+  # Join estimates with filtered data by OTU
+  inner_join(filtered_diet, by = "OTU") |> 
+  # Keep only significant OTUs
+  filter(is_significant == "yes") |> 
+  arrange(q.value) |> 
+  slice_head(n = 30) |> 
+  # Plot reordering OTUs by their effect estimates
+  ggplot(aes(x = estimate, y = fct_reorder(OTU, estimate), color = Phylum)) +
+    geom_point(size = 2) +
+    # Add horizontal error bars for confidence intervals
+    geom_errorbarh(aes(xmax = conf.high, xmin = conf.low)) +
+    # Add a vertical line at 0 for reference
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray") +
+    labs(
+      title = "Top 30 OTUs Associated with Western Diet",
+      subtitle = "Colored by Phylum",
+      x = "Estimates (95% Confidence Intervals)",
+      y = "OTU"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14),
+      plot.subtitle = element_text(hjust = 0.5, size = 12)
+    )
+```
+
+This plot highlights the top 30 OTUs significantly associated with the Western Diet, colored by their respective phyla (Firmicutes and Bacteroidetes). Most OTUs with positive estimates (higher abundance in the Western Diet) belong to Firmicutes, while some Bacteroidetes are negatively associated.
+
+By focusing on a specific OTU that showed variation between the diets, we confirmed that the OTU demonstrates a clear shift in its abundance, indicating that it is influenced by the dietary conditions.
+
+```{r}
+diet_phylum_analysis |>  
+  filter(OTU == "OTU710") |> 
+  group_by(Diet) |>          
+  summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE))
+```
+
+Moreover, counting the number of OTUs associated with each diet and phylum helps identify trends, such as a particular phylum showing a stronger association with one diet compared to the other.
+
+```{r}
+vector_otus <- otus_test |> 
+  pull(OTU)
+
+result <- diet_phylum_analysis |> 
+  filter(OTU %in% vector_otus) |>  
+  group_by(OTU, Diet) |> 
+  summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE), 
+            .groups = "drop") |> 
+  group_by(OTU) |> 
+  mutate(higher_in = if_else(
+    total_rel_abundance[Diet == 0] > total_rel_abundance[Diet == 1], 
+    "LFPP Diet", 
+    "Western Diet")) |> 
+  distinct(OTU, higher_in)
+
+
+result <- result |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  select(OTU, Phylum, higher_in)
+```
+
+```{r}
+contingency_table <- result %>%
+  group_by(higher_in, Phylum) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = Phylum, values_from = count, values_fill = 0)
+
+contingency_table
+```
+
+```{r}
+plot_data <- result |> 
+  group_by(Phylum, higher_in) |> 
+  summarize(count = n(), .groups = "drop")
+
+ggplot(plot_data, aes(x = Phylum, y = count, fill = higher_in)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  labs(
+    title = "OTUs with Higher Relative Abundance by Diet",
+    x = "Phylum",
+    y = "Number of OTUs",
+    fill = "Higher in"
+  ) +
+  theme_minimal()
+```
+
+A substantial number of Firmicutes OTUs exhibit higher relative abundance in the Western Diet, indicating that Firmicutes are likely more influenced by the characteristics of diets high in fats and sugars. The more balanced distribution of Bacteroidetes and Firmicutes in the LFPP Diet suggests a healthier microbiota composition, often associated with diets rich in fiber and low in processed foods.
