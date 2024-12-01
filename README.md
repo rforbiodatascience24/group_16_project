@@ -4,7 +4,7 @@ This repository includes the analysis of data wrangling and visualization of a d
 
 ## Project Contributors
 
-| Family name | First name | GitHub username | student ID |
+| Family name | First name | GitHub username | Student ID |
 |----------|----------|----------|----------|
 | De Lamadrid Ordóñez | Lucía | luciadelama | s243311 |
 | Gkopi | Konstantina | KonstantinaGkopi | s243692 |
