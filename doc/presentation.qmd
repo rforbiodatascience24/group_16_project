@@ -29,7 +29,6 @@ library("tidyverse")
 ::: {.column width="50%"}
 ![](images/article_title.png)
 
-
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
 -   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
@@ -69,6 +68,7 @@ data_folder <- "../data"
 
 ## Data tidying and filtering
 
+::: {.nonincremental style="font-size: 25px;"}
 -   Added a SampleID column to uniquely identify each sample.
 
 -   Transformed the dataset from wide to long format for easier analysis.
@@ -76,10 +76,11 @@ data_folder <- "../data"
 -   Filtering Low-Abundance OTUs: Retained OTUs contributing up to 95% of cumulative abundance.
 
 -   Replaced the numeric codes with descriptive labels.
+:::
 
 ::: {style="font-size: 20px;"}
 ::: columns
-::: {.column width="50%"}
+::: {.column width="50%" style="font-size: 30px;"}
 ```{r}
 #| echo: true
 #| eval: false
@@ -158,8 +159,8 @@ head(filtered_metadata_stricter_label)
 ```
 :::
 
-::: {.column width="50%"}
-![](images/cumulative_abundance_OTU.png)
+::: {.column width="50%" style="text-align: center;"}
+![](images/cumulative_abundance_OTU.png){width="628"}
 :::
 :::
 :::
