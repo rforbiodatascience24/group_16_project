@@ -128,7 +128,7 @@ head(cumulative_otus)
 
 ```{r}
 # Plot cumulative contribution
-ggplot(
+cumulative_plot <- ggplot(
   data = cumulative_otus, 
   mapping = aes(x = reorder(OTU, -mean_abundance), 
                 y = cumulative_abundance, 
@@ -144,12 +144,24 @@ ggplot(
   geom_vline(xintercept = 0, 
              color = "black", 
              linetype = "solid") +   # Add y-axis
-  labs(title = "Cumulative Contribution of OTUs", 
+  labs(title = "Cumulative contribution of OTUs", 
        x = "OTU (Ranked by Abundance)", 
        y = "Cumulative Abundance") +  
 theme(axis.text.x = element_blank(), 
-      axis.ticks.x = element_blank()
+      axis.ticks.x = element_blank(), 
+      plot.title = element_text(hjust = 0.5)
 )
+
+cumulative_plot
+```
+
+```{r}
+ggsave("../results/cumulative_abundance_OTU.png", 
+       plot = cumulative_plot, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
 ```
 
 From the plot above, we can see that a little fraction of all the OTUs contribute to the most relative abundance, whilst a large number of them hardly add any value to the cumulative abundance. Consequently, keeping the OTUs that made up until 95% of all the cumulative abundance is a good filter: we can reduce notably the dimensions of the dataset, while we don't lose information biologically meaningful.
@@ -219,7 +231,7 @@ ggplot(
 Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the equivalences provided by the dictionary dataframe:
 
 ```{r}
-filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
+filtered_metadata_label <- filtered_metadata |> 
   mutate(Diet = case_when(Diet == 0 ~ "LFPP",
                           Diet == 1 ~ "Western",
                           Diet == 2 ~ "CARBR",
@@ -250,7 +262,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                                    CollectionMet == 1 ~ "Scraping")) |> 
   mutate(Sex = case_when(Sex == 0 ~ "Male",
                          Sex == 1 ~ "Female")) 
-head(filtered_metadata_stricter_label)
+head(filtered_metadata_label)
 ```
 
 Some subsequent analyses will require us to use a wide dataset:
