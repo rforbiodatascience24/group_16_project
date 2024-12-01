@@ -58,9 +58,8 @@ To study the relationship between the composition of the gut microbiota and fact
 ::: {.column width="50%" style="font-size: 25 px"}
 ```{r}
 data_folder <- "../data"
-
 # Read the data
-#metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
+metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
 ```
 :::
 :::
