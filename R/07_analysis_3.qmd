@@ -19,7 +19,7 @@ Read data
 wide_df <- read.table('../data/02_metadata_wide_filtered_label.tsv', 
                        header=TRUE, 
                        sep='\t')
-head(wide_df)
+#head(wide_df)
 ```
 
 ### Biodiversity of humanised mice microbiota with different diet
@@ -30,13 +30,13 @@ The formula we will use is:
 
 $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs} $$
 
-We will compare this index for first generation humanised mice following each diet. For this purpose, we will use the original raw data, in which all OTU counts (including the less abundant ones) are included.
+We will compare this index for first generation humanised mice following each diet. For this purpose, we will use the wide data, in which the rows include all OTU counts for each sample.
 
 We calculate the Shannon index for each row and save it in a new dataframe.
 
 ```{r}
 shannon <- wide_df |> 
-  filter(Donor == "Fresh" & Source != "Fecal" & Diet %in% c("Western", "LFPP")) |>#same filters as before
+  filter(Donor == "Fresh" & Source != "Fecal" & Diet %in% c("Western", "LFPP")) |>#first generation ("fresh" donor), only take into account "final" snapshots of the microbiota (no intermediate fecal samples), and we make sure we are only comparing the two diets 
   group_by(Diet) |> 
   select(starts_with("OTU")) |> #we only need the OTU columns to calculate the index 
   mutate(across(everything(), ~ (-1)*.x * log(.x))) |> #we transform each OTU relative abundance column (p_i) into p_i*log(p_i) 
@@ -62,7 +62,7 @@ t_test_result
 The result of the *t* test is that the means of the Shannon index for each diet are (very) significantly different. We can now represent this result in a barplot, showing the standard deviation as error.
 
 ```{r}
-shannon |> group_by(Diet) |>
+shannon_plot <-shannon |> group_by(Diet) |>
   summarise(shannon_index= mean(sh),
     standard_dev = sd(sh)) |>
   ggplot(aes(x = Diet,
@@ -83,6 +83,17 @@ shannon |> group_by(Diet) |>
     axis.title = element_text(size = 14),  # Large axis labels
     axis.text = element_text(size = 12)    # Large axis text
   )
+
+ggsave("../results/shannon.png", 
+       plot = shannon_plot, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
+```
+
+```{r}
+shannon_plot
 ```
 
 Interestingly, the Western diet leads to a more biodiverse microbiota than the "healthier" LF-PP diet in the humanised mice. This is in line with the results of representing the microbiota composition in function of phylum, in which the different type of phyla were more evenly distributed in the Western diet.

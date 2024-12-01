@@ -25,7 +25,9 @@ library("tidyverse")
 
 # Introduction
 
-## Objective and Main Research Questions
+::: columns
+::: {.column width="50%"}
+![](images/article_title.png)
 
 ![](./images/article_title.png){.absolute top="200" left="0" width="1200" height="400"}
 
@@ -33,17 +35,17 @@ library("tidyverse")
 
 -   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
 
-Our aim:
+![](./mice_experiments.jpg){.absolute top="50" right="50" width="800" height="400"}
+
+#### Our aim:
 
 To study the relationship between the composition of the gut microbiota and factors such as diet and colonisation history.
+:::
 
-#### Main Research Questions:
-
--   **Modelling** of the **Firmicutes-Bacteroidetes ratio**
-
--   Deciphering key **factors** shaping **ecosystem composition** through **PCA** and **clustering** analysis
-
--   Evalauting the effect of **diet** in the **microbial biodiversity**
+::: {.column width="50%"}
+![](images/experiments.png)
+:::
+:::
 
 # Materials and Methods
 
@@ -211,7 +213,7 @@ head(clean_df_augm)
 ```
 :::
 
-# Results
+# Results and Discussion
 
 ## Microbiota composition in terms of phyla in different:
 
@@ -323,9 +325,29 @@ clustered_metadata <- filtered_metadata_wider |>
 :::
 :::
 
-## 07
+## Biodiversity and diet
 
-## Discussion
+::: columns
+::: {.column width="50%"}
+**Shannon diversity index**
+
+-   Number of species living in a habitat (**richness**)
+
+<!-- -->
+
+-   Relative abundance (**evenness**).
+
+$$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs} $$
+:::
+
+::: {.column width="50%"}
+![](images/shannon-01.png)
+
+**Biodiversity** in the microbiota of first-generation humanized mice was found to differ **significantly** across different **diets**.
+:::
+:::
+
+# Conclusion
 
 -   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
 
