@@ -1,24 +1,340 @@
 ---
-title: "presentation"
-format: revealjs
+title: "Impact of Dietary Shifts on Gut Microbiome Dynamics"
+subtitle: "Multivariate Insights Using R"
+author: "Group 16: Eric Torres, Lucia de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago"
+date: December 3, 2024
+course: R for Bio Data Analysis
+format:
+  revealjs:
+    incremental: true  
+    width: 1600   
+    height: 800 
+    embed-resources: true
+    theme: night
+    dpi: 300
+    template-partials:
+      - title-slide.html
 editor: visual
 ---
 
-## Quarto
+# Introduction
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+## Objective and Main Research Questions
 
-## Bullets
+![](./images/article_title.png){.absolute top=200 left=0 width="1200" height="400"}
 
-When you click the **Render** button a document will be generated that includes:
+-   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
--   Content authored with markdown
--   Output from executable code
+-    Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
 
-## Code
+![](./mice_experiments.jpg){.absolute top=50 right=50 width="800" height="400"}
 
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+#### Our aim:
+
+To study the relationship between the composition of the gut microbiota and factors such as diet and colonisation history.
+
+#### Main Research Questions:
+
+-   **Modelling** of the **Firmicutes-Bacteroidetes ratio**
+
+-   Deciphering key **factors** shaping **ecosystem composition** through **PCA** and **clustering** analysis
+
+-   Evalauting the effect of **diet** in the **microbial biodiversity**
+
+## Data Loading
+
+::: {style="font-size: 22px;"}
+-   **MicrobiomeWithMetadata.csv** (Main dataset):\
+    Contains the relative abundance of OTUs analyzed per observation, along with the conditions of each sample (e.g., diet, sex, etc.).
+
+    ```{r}
+    #| message: false 
+    #| echo: true
+    library(tidyverse) 
+    # Read the data
+    metadata_df <- read_tsv(file = str_c('../data/01_data_metadata.tsv'))
+
+    # Check the structure of the data
+    head(metadata_df)
+    ```
+
+-   **MicrobiomeMetadataDictionary.csv** (Complementary):\
+    Provides the equivalence between coded numerical values and their corresponding sample conditions.
+
+-   **MicrobiomeOTUtaxonomy.csv** (Complementary):\
+    Contains the taxonomic classification of each OTU analyzed.
+
+-   **Source:**\
+    [Explore Microbiome Dataset](https://www.exploredata.net/Downloads/Microbiome-Data-Set)\
+    Curated version of the microbiome dataset from Turnbaugh *et al.* (original publication available in accompanying files).
+:::
+
+# Materials and Methods
+
+## Data Tidying and Filtering
+
+::: {style="font-size: 20px;"}
+-   Added a `SampleID` column to uniquely identify each sample + Transformed the dataset from **wide** to **long** format for easier analysis.
 
 ```{r}
-1 + 1
+#| echo: true
+#| output-location: column
+
+# Creation and relocation of SampleID
+metadata_df <- metadata_df |>
+  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
+  relocate(SampleID, 
+           .before = everything())  # Move SampleID to the first position
+
+metadata_df_long <- metadata_df |> 
+  pivot_longer(
+    cols = starts_with("OTU"), 
+    names_to = "OTU", 
+    values_to = "rel_abundance"
+  )
+head(metadata_df_long)
 ```
+
+-   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance**. Additionally, removed OTUs with extremely low relative abundances.
+
+-   Replaced the numeric codes with descriptive labels.
+:::
+
+::: columns
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
+# Calculate cumulative contribution
+cumulative_otus <- metadata_df_long |>
+  group_by(OTU) |>
+  summarize(mean_abundance = mean(rel_abundance)) |>
+  arrange(desc(mean_abundance)) |>
+  mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
+# Filter OTUs contributing to 95% cumulative abundance
+otus_to_keep <- cumulative_otus |>
+  filter(cumulative_abundance <= 0.95) |>
+  pull(OTU)
+# Filter the metadata to retain only these OTUs
+filtered_metadata <- metadata_df_long |>
+  filter(OTU %in% otus_to_keep)
+dim(filtered_metadata)
+# Set the stricter abundance threshold
+abundance_threshold <- 1e-6
+# Apply the threshold to filter OTUs
+filtered_metadata_stricter <- filtered_metadata |>
+  filter(rel_abundance >= abundance_threshold)
+dim(filtered_metadata_stricter)
+
+
+
+```
+:::
+
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
+filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
+  mutate(Diet = case_when(Diet == 0 ~ "LFPP",
+                          Diet == 1 ~ "Western",
+                          Diet == 2 ~ "CARBR",
+                          Diet == 3 ~ "FATR",
+                          Diet == 4 ~ "Suckling",
+                          Diet == 5 ~ "Human")) |> 
+  mutate(Source = case_when(Source == 0 ~ "Cecum1",
+                          Source == 1 ~ "Cecum2", 
+                          Source == 2 ~ "Colon1", 
+                          Source == 3 ~ "Colon2", 
+                          Source == 4 ~ "Feces",
+                          Source == 5 ~ "SI1",
+                          Source == 6 ~ "SI13", 
+                          Source == 7 ~ "SI15", 
+                          Source == 8 ~ "SI2", 
+                          Source == 9 ~ "SI5",
+                          Source == 10 ~ "SI9", 
+                          Source == 11 ~ "Stomach", 
+                          Source == 12 ~ "Cecum")) |> 
+  mutate(Donor = case_when(Donor == 0 ~ "HMouseLFPP",
+                          Donor == 1 ~ "CONVR", 
+                          Donor == 2 ~ "Human", 
+                          Donor == 3 ~ "Fresh", 
+                          Donor == 4 ~ "Frozen",
+                          Donor == 5 ~ "HMouseWestern", 
+                          Donor == 6 ~ "CONVD")) |> 
+  mutate(CollectionMet = case_when(CollectionMet == 0 ~ "Contents",
+                                   CollectionMet == 1 ~ "Scraping")) |> 
+  mutate(Sex = case_when(Sex == 0 ~ "Male",
+                         Sex == 1 ~ "Female")) 
+```
+:::
+:::
+
+## Our data is tidy... and ready to be augmented!
+
+::: {style="font-size: 27px;"}
+We will use the OTUs taxonomy file to add columns with the names of phylum and class for each OTU, using `left_join`.
+
+::: columns
+::: {.column width="50%" style="font-size: 24px;"}
+```{r}
+#| echo: true
+clean_df <- read_tsv('../data/02_metadata_long_filtered_label.tsv')
+head(clean_df)
+```
+:::
+
+::: {.column width="50%" style="font-size: 24px;"}
+```{r}
+#| echo: true
+otu_df_original <- read.table('../data/01_data_otu.tsv', header = TRUE, sep = ",")
+head(otu_df_original)
+```
+:::
+:::
+:::
+
+```{r}
+#| include: false
+otu_df_modified <-  otu_df_original |> 
+  select(OTU.ID, Phylum, Class) |> 
+  mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
+  mutate(Class = if_else(Class == "", "Unclassified", Class))
+
+otu_df_modified[0:5,]
+```
+
+::: {style="width: 100%; white-space: nowrap; overflow-x: auto; font-size: 28px;"}
+```{r}
+#| echo: true
+clean_df_augm <- clean_df |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  relocate(Phylum, Class, .after = OTU) 
+head(clean_df_augm)
+```
+:::
+
+# Results
+
+## Microbiota composition in terms of phyla in different:
+
+<div>
+
+::: columns
+::: {.column width="50%"}
+-   **sources and diet types**
+
+    ![](images/phyla_sour_diet.png){width="750"}
+:::
+
+::: {.column width="50%"}
+-   **diet and donor combination**
+
+    ![](images/phyla_don_diet.png){width="750"}
+:::
+:::
+
+</div>
+
+## 05
+
+## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
+
+```{r}
+#| include: false
+library(broom)
+library(ggrepel)
+library(cowplot)
+```
+
+::: columns
+::: {.column width="50%" style="font-size: 25px;"}
+```{r}
+#| echo: true
+# Aggregate relative abundances by phylum
+aggregated_data <- clean_df_augm |>
+  filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
+  group_by(SampleID, Phylum, Diet) |> 
+  summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
+
+# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
+aggregated_wide <- aggregated_data |> 
+  pivot_wider(names_from = Phylum, values_from = rel_abundance) |> 
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1)) #pca uses numerical values so we modify the diet column
+
+# Check of the aggregated data
+head(aggregated_wide)
+```
+
+![](images/pca_variance-01.png){width="800"}
+:::
+:::
+
+## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
+
+::: columns
+::: {.column width="50%"}
+![![](images/clipboard-1125396256.png)](images/pca_contributions-06.png){width="700"}
+:::
+:::
+
+## Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
+
+::: columns
+::: {.column width="40%" style="font-size: 25px;"}
+```{r}
+#| echo: true
+#| eval: false
+# Read the metadata in wide format
+filtered_metadata_wider <- read_tsv("../data/02_metadata_wide_filtered_label.tsv")
+# Select OTU columns
+otu_data <- filtered_metadata_wider |>
+  select(starts_with("OTU"))
+
+# Scale the OTU data
+otu_data_scaled <- otu_data |> 
+  scale()
+
+# Convert scaled matrix back to tibble for tidyverse compatibility
+otu_data_scaled <- as_tibble(otu_data_scaled)
+
+# Add relevant metadata (e.g., Donor)
+otu_data_with_metadata <- otu_data_scaled |>
+  mutate(Donor = filtered_metadata_wider |> pull(Donor))
+
+# Compute Euclidean distance matrix
+dist_matrix <- otu_data_scaled |>
+  dist()
+
+# Perform hierarchical clustering
+hclust_result <- hclust(dist_matrix, method = "ward.D2")
+
+# Cut dendrogram into 3 clusters
+cluster_labels <- cutree(hclust_result, k = 3) |>
+  as_tibble() |>
+  rename(Cluster = value)
+
+# Attach cluster labels to metadata
+clustered_metadata <- filtered_metadata_wider |> 
+  mutate(Cluster = cluster_labels |> pull(Cluster))
+```
+:::
+
+::: {.column width="60%" style="text-align: center;"}
+![](images/clusters-01.png){width="621"}
+:::
+:::
+
+## 07
+
+## Discussion
+
+-   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
+
+```{=html}
+<!-- -->
+```
+-   PCA shows how diet shapes microbial composition, as well as the relationship between different phyla.
+
+-   Clustering shines light on how the microbiota donor structures the data
+
+-   The Western diet favours a more biodiverse gut ecosystem

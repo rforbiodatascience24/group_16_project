@@ -11,47 +11,58 @@ editor: visual
 
 ```{r}
 #| message: false 
-library(tidyverse) 
-library(readr)
+library("tidyverse") 
+library("readr")
 ```
 
 ### 2. Read data
 
 ```{r}
+<<<<<<< HEAD
 #| message: false 
 data_folder = "../data"
 
 metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
                           header = TRUE, 
                           sep = '\t')
+=======
+# Read the data
+metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
+
+# Check the structure of the data
+>>>>>>> main
 head(metadata_df)
 ```
 
 ```{r}
-dim(metadata_df)
+metadata_df |> 
+  summarise(
+    rows = n(),
+    columns = ncol(metadata_df)
+  )
 ```
 
 The original dataset has dimensions $N = 675$ and $M = 6702$.
 
 ### 3. Data cleaning
 
-As the dataset lacks of an identifier which can act as primary key, it would be very useful to add a new column with it for the subsequent analyses:
+As the dataset lacks of an identifier which can act as primary key, we introduce a numeric surrogate key using the row number (SampleID):
 
 ```{r}
+
 #| message: false 
-# Creation and relocation of SampleID
 metadata_df <- metadata_df |>
-  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
+  mutate(SampleID = row_number()) |> 
   relocate(SampleID, 
            .before = everything())  # Move SampleID to the first position
-head(metadata_df)
+#head(metadata_df)
 ```
 
-We first have to check if there are any missing values:
+We check the existence of missing values:
 
 ```{r}
-na_check <- anyNA(metadata_df)
-na_check
+metadata_df |>  
+  summarise(total_na = sum(is.na(metadata_df)))
 ```
 
 Although it seems highly improbable (due to the large number of columns), we should also check if there duplicate rows:
@@ -60,12 +71,13 @@ Although it seems highly improbable (due to the large number of columns), we sho
 metadata_df |> 
   group_by(SampleID) |> 
   count(SampleID, 
-        sort = TRUE)
+        sort = TRUE) |> 
+  filter(n > 1)
 ```
 
-None of the rows was repeated.
+There are no NA values nor repeated observations.
 
-To really check that the values of the columns that start with OTU are relative abundances, we can check that the sum of all them has to be 1 for all the rows:
+To check that the values of the columns that start with 'OTU' are relative abundances, we can verify that the sum of all the rows has to be 1 for each OTU:
 
 ```{r}
 otu_columns <- select(metadata_df, 
@@ -74,7 +86,7 @@ row_sums <- rowSums(otu_columns)
 summary(row_sums)
 ```
 
-Columns *Data*, *Source*, *Donor*, *Collection* and *Sex* are discrete, nominal values. On the other hand, the columns that have the relative abundances of the OTUs are continuous. As all of them represent the same concept, the ranges are the same. Consequently, it is not necessary to perform data normalization.
+Columns *Data*, *Source*, *Donor*, *Collection* and *Sex* are discrete, nominal values. On the other hand, the columns with the relative abundances of the OTUs are continuous. As all of them represent the same concept, the ranges are the same. Consequently, it is not necessary to perform data normalization.
 
 A dataset is tidy when:
 
@@ -84,19 +96,7 @@ A dataset is tidy when:
 
 -   Each value is a cell
 
-First, we will create a SampleID column.
-
-```{r}
-#| message: false 
-# Creation and relocation of SampleID
-metadata_df <- metadata_df |>
-  mutate(SampleID = row_number()) |>  # Create SampleID from the first column
-  relocate(SampleID, 
-           .before = everything())  # Move SampleID to the first position
-head(metadata_df)
-```
-
-In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
+In the dataset we are working with, there are columns (`OTU0`- `OTU-6695`) in which the column names are in reality one variable (`OTU`) and the cell values are another variable (`rel_abundance`). To do some tidying, we are going to use `pivot_longer()`:
 
 ```{r}
 metadata_df_long <- metadata_df |> 
@@ -105,7 +105,9 @@ metadata_df_long <- metadata_df |>
     names_to = "OTU", 
     values_to = "rel_abundance"
   )
-dim(metadata_df_long)
+
+metadata_df_long |>  
+    summarise(rows = n())
 ```
 
 As a result, we get a dataframe of $N = 4,519,800$ !
@@ -125,10 +127,15 @@ cumulative_otus <- metadata_df_long |>
   mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
 
 head(cumulative_otus)
+```
 
+```{r}
 # Plot cumulative contribution
-ggplot(cumulative_otus, 
-       aes(x = reorder(OTU, -mean_abundance), y = cumulative_abundance, group = 1)
+ggplot(
+  data = cumulative_otus, 
+  mapping = aes(x = reorder(OTU, -mean_abundance), 
+                y = cumulative_abundance, 
+                group = 1)
   ) +
   geom_line() +
   geom_hline(yintercept = 0.95, 
@@ -146,10 +153,13 @@ ggplot(cumulative_otus,
 theme(axis.text.x = element_blank(), 
       axis.ticks.x = element_blank()
 )
-
 ```
 
-We are going to keep the OTUs that made up until 95% of all the cumulative abundance. There are many OTUs that are very little represented, and so they hardly add nothing to the cumulative abundance. Those are the ones we are getting rid of:
+From the plot above, we can see that a little fraction of all the OTUs contribute to the most relative abundance, whilst a large number of them hardly add any value to the cumulative abundance. Consequently, keeping the OTUs that made up until 95% of all the cumulative abundance is a good filter: we can reduce notably the dimensions of the dataset, while we don't lose information biologically meaningful.
+
+Note: we are doing an assumption that the most abundant OTUs are the ones with the biggest biological importance. This is not always true, like the case of keystone species, which exert big influence despite their low abundance.
+
+summarise(rows = n())
 
 ```{r}
 # Filter OTUs contributing to 95% cumulative abundance
@@ -159,77 +169,101 @@ otus_to_keep <- cumulative_otus |>
 
 # Filter the metadata to retain only these OTUs
 filtered_metadata <- metadata_df_long |>
-  filter(OTU %in% otus_to_keep)
+  filter(OTU %in% otus_to_keep) 
 
-head(filtered_metadata)
+filtered_metadata |>  
+  summarise(rows = n())
 ```
 
 As a result, we get a data frame of $N = 264,600$ !
 
 ```{r}
 # Number of OTUs before filtering
-n_total_otus <- metadata_df_long |> pull(OTU) |> n_distinct()
+n_total_otus <- metadata_df_long |> 
+  pull(OTU) |> 
+  n_distinct()
 
 # Number of OTUs after filtering
-n_filtered_otus <- filtered_metadata |> pull(OTU) |> n_distinct()
+n_filtered_otus <- filtered_metadata |> 
+  pull(OTU) |> 
+  n_distinct()
+
 # Print results
 cat("Number of OTUs before filtering:", n_total_otus, "\n")
 cat("Number of OTUs after filtering:", n_filtered_otus, "\n")
 cat("Number of OTUs removed:", n_total_otus - n_filtered_otus, "\n")
 cat("Percentage of OTUs removed:", (n_total_otus - n_filtered_otus) * 100 / n_total_otus, "% \n")
-
 ```
 
-Filtering down from **6,696 OTUs to 392** (removing **6,304 OTUs**) might seem like a large loss, but this is often expected in microbiome datasets due to the nature of the data.
+As a result of the filtering, we have narrowed down the number of OTUs from **6,696 OTUs to 392**, **6,304 OTUs** were removed.
 
-We check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them.
+We check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them. To get a good 'visualisation resolution', we use a log-scale.
 
 ```{r}
 # Distribution of OTU relative abundances
+<<<<<<< HEAD
 ggplot(filtered_metadata, 
        aes(x = rel_abundance)) +
   geom_histogram(bins = 50, 
+=======
+ggplot(
+  data = filtered_metadata, 
+  mapping = aes(x = rel_abundance)
+  ) +
+  geom_histogram(bins = 500, 
+>>>>>>> main
                  fill = "skyblue", 
                  alpha = 0.7) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0)  +
   scale_x_log10() +
-  labs(title = "Distribution of OTU Relative Abundances", 
-       x = "Relative Abundance (Log Scale)", 
+  labs(title = "Distribution of OTU relative abundances", 
+       x = "Relative Abundance (Log scale)", 
        y = "Frequency") +
-  theme_minimal()
-
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Filter stricter because the distribution shows a large number of OTUs with extremely low relative abundances, likely representing noise or negligible contributors.
+From the plot above, we can apply a stricter filter because the distribution shows a large number of OTUs with extremely low relative abundances.
 
 ```{r}
-# Set the stricter abundance threshold
 abundance_threshold <- 1e-6
 # Apply the threshold to filter OTUs
 filtered_metadata_stricter <- filtered_metadata |>
   filter(rel_abundance >= abundance_threshold)
-head(filtered_metadata_stricter)
+
+filtered_metadata_stricter |> 
+  summarise(rows = n())
 ```
 
 As a result, we get a data frame of $N = 65,938$ !
 
 ```{r}
 # Plot the distribution of relative abundances after stricter filtering
+<<<<<<< HEAD
 ggplot(filtered_metadata_stricter, 
        aes(x = rel_abundance)) +
   geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0) +
+=======
+ggplot(
+  data = filtered_metadata_stricter, 
+  mapping = aes(x = rel_abundance)
+  ) +
+  geom_histogram(bins = 50, 
+                 fill = "skyblue", 
+                 alpha = 0.7) +
+>>>>>>> main
   scale_x_log10() +
-  labs(title = "Distribution of OTU Relative Abundances", 
-       x = "Relative Abundance (Log Scale)", 
+  labs(title = "Distribution of OTU relative abundances", 
+       x = "Relative Abundance (Log scale)", 
        y = "Frequency") +
-  theme_minimal()
-
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the dictionary dataframe:
+Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the equivalences provided by the dictionary dataframe:
 
 ```{r}
 filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
@@ -249,7 +283,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                           Source == 7 ~ "SI15", 
                           Source == 8 ~ "SI2", 
                           Source == 9 ~ "SI5",
-                          Source == 10 ~ "CSI9", 
+                          Source == 10 ~ "SI9", 
                           Source == 11 ~ "Stomach", 
                           Source == 12 ~ "Cecum")) |> 
   mutate(Donor = case_when(Donor == 0 ~ "HMouseLFPP",
@@ -266,28 +300,39 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
 head(filtered_metadata_stricter_label)
 ```
 
-Wide format
+Some subsequent analyses will require us to use a wide dataset:
 
 ```{r}
-# Pivot to wide format
 filtered_metadata_wider <- filtered_metadata_stricter_label |> 
   pivot_wider(
-    names_from = OTU,               # OTU column becomes the new column names
-    values_from = rel_abundance,    # Use rel_abundance for cell values
-    values_fill = 0                 # Fill missing values with 0
+    names_from = OTU,               
+    values_from = rel_abundance,    
   )
-
-# Check the resulting wide-format dataset
+  
 head(filtered_metadata_wider)
-
 ```
 
 Our dataset is now tidy! Let’s save the results.
 
 ```{r}
-write.table(filtered_metadata_stricter, "../data/02_metadata_long_filtered.tsv", sep = "\t", quote = FALSE, col.names = NA)
+write.table(
+  filtered_metadata_stricter, 
+  "../data/02_metadata_long_filtered.tsv", 
+  sep = "\t", 
+  quote = FALSE
+)
 
-write.table(filtered_metadata_stricter_label, "../data/02_metadata_long_filtered_label.tsv", sep = "\t", quote = FALSE, col.names = NA)
+write.table(
+  filtered_metadata_stricter_label, 
+  "../data/02_metadata_long_filtered_label.tsv", 
+  sep = "\t", 
+  quote = FALSE
+)
 
-write.table(filtered_metadata_wider, "../data/02_metadata_wide_filtered_label.tsv", sep = "\t", quote = FALSE, col.names = NA)
+write.table(
+  filtered_metadata_wider, 
+  "../data/02_metadata_wide_filtered_label.tsv", 
+  sep = "\t", 
+  quote = FALSE
+)
 ```

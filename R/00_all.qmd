@@ -1,6 +1,6 @@
 ---
 title: "00_all"
-author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi and Jorge Santiago
+author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format:
   html:
     embed-resources: true
@@ -46,3 +46,13 @@ rm(list=ls())
 ```
 
 ## Analysis 2
+
+```{r}
+#| child: "06_analysis_2.qmd"
+```
+
+## Analysis 3
+
+```{r}
+#| child: "07_analysis_3.qmd"
+```
