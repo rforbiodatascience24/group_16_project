@@ -157,7 +157,7 @@ cumulative_plot
 
 ```{r}
 ggsave("../results/cumulative_abundance_OTU.png", 
-       plot = plot2, 
+       plot = cumulative_plot, 
        width = 8, 
        height = 6, 
        units = "in", 
