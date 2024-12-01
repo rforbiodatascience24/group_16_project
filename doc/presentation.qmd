@@ -6,6 +6,7 @@ date: December 3, 2024
 course: R for Bio Data Analysis
 format:
   revealjs:
+    incremental: true  
     width: 1600   
     height: 800 
     embed-resources: true
@@ -20,15 +21,25 @@ editor: visual
 
 ## Objective and Main Research Questions
 
-#### Objective:
+![](./images/article_title.png){.absolute top=200 left=0 width="1200" height="400"}
 
-\-
+-   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
-#### Research Questions:
+-    Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
 
-1\.
+![](./mice_experiments.jpg){.absolute top=50 right=50 width="800" height="400"}
 
-2\.
+#### Our aim:
+
+To study the relationship between the composition of the gut microbiota and factors such as diet and colonisation history.
+
+#### Main Research Questions:
+
+-   **Modelling** of the **Firmicutes-Bacteroidetes ratio**
+
+-   Deciphering key **factors** shaping **ecosystem composition** through **PCA** and **clustering** analysis
+
+-   Evalauting the effect of **diet** in the **microbial biodiversity**
 
 ## Data Loading
 
@@ -48,14 +59,14 @@ editor: visual
     ```
 
 -   **MicrobiomeMetadataDictionary.csv** (Complementary):\
-    Provides the equivalence between numerical values and their corresponding sample conditions.
+    Provides the equivalence between coded numerical values and their corresponding sample conditions.
 
 -   **MicrobiomeOTUtaxonomy.csv** (Complementary):\
     Contains the taxonomic classification of each OTU analyzed.
 
 -   **Source:**\
     [Explore Microbiome Dataset](https://www.exploredata.net/Downloads/Microbiome-Data-Set)\
-    Curated version of the microbiome dataset from Turnbaugh et al. (original publication available in accompanying files).
+    Curated version of the microbiome dataset from Turnbaugh *et al.* (original publication available in accompanying files).
 :::
 
 # Materials and Methods
@@ -84,9 +95,9 @@ metadata_df_long <- metadata_df |>
 head(metadata_df_long)
 ```
 
--   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance** to remove low-abundance and negligible contributors. Additionally, removed OTUs with extremely low relative abundances.
+-   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance**. Additionally, removed OTUs with extremely low relative abundances.
 
--   Replace the numeric codes with descriptive labels.
+-   Replaced the numeric codes with descriptive labels.
 :::
 
 ::: columns
@@ -157,7 +168,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
 :::
 :::
 
-## Our tidy data set...ready to be augmented!
+## Our data is tidy... and ready to be augmented!
 
 ::: {style="font-size: 27px;"}
 We will use the OTUs taxonomy file to add columns with the names of phylum and class for each OTU, using `left_join`.
@@ -253,10 +264,8 @@ aggregated_wide <- aggregated_data |>
 # Check of the aggregated data
 head(aggregated_wide)
 ```
-:::
 
-::: {.column width="50%" style="text-align: center;"}
-![](images/pc1vspc2-04.png){width="738"}
+![](images/pca_variance-01.png){width="800"}
 :::
 :::
 
@@ -264,11 +273,7 @@ head(aggregated_wide)
 
 ::: columns
 ::: {.column width="50%"}
-![](images/pca_contributions-06.png){width="700"}
-:::
-
-::: {.column width="50%"}
-![](images/pca_variance-09.png){width="700"}
+![![](images/clipboard-1125396256.png)](images/pca_contributions-06.png){width="700"}
 :::
 :::
 
@@ -323,4 +328,13 @@ clustered_metadata <- filtered_metadata_wider |>
 
 ## Discussion
 
-......
+-   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
+
+```{=html}
+<!-- -->
+```
+-   PCA shows how diet shapes microbial composition, as well as the relationship between different phyla.
+
+-   Clustering shines light on how the microbiota donor structures the data
+
+-   The Western diet favours a more biodiverse gut ecosystem
