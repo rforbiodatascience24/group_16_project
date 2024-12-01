@@ -317,7 +317,7 @@ clustered_metadata <- filtered_metadata_wider |>
 :::
 
 ::: {.column width="60%" style="text-align: center;"}
-![](images/clusters-01.png){width="621"}
+![](images/clusters-01.png){width="652"}
 :::
 :::
 
