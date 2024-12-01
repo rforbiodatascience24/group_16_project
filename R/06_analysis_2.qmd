@@ -88,7 +88,8 @@ pca1 <- ggplot(pca_variance, aes(x = PC, y = percent)) +
   theme_minimal(base_size = 14) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.title.y = element_text(size = 14),
     panel.grid.major = element_blank()
   ) +
   geom_hline(yintercept = 0.9, linetype = "dashed", size = 0.5) + # Add line at 90% variance explained
@@ -128,7 +129,12 @@ pca2 <- otu_data_pca |>
   theme_minimal() +
   theme(
     panel.grid.major = element_blank(),
-    legend.position = "right"     
+    legend.position = "right",
+    plot.title = element_text(size = 25, hjust = 0.5, face = "bold"),
+    legend.title = element_text(size = 20),
+    legend.text = element_text(size = 15),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)  
   )
 
 pca2
@@ -164,7 +170,7 @@ print(rotation_pivot)
 pca3 <- ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
   geom_segment(aes(xend = 0, yend = 0), arrow = arrow_style, size = 0.8) +
   scale_color_brewer(palette = "Dark2") +
-  geom_text_repel(aes(label = column), size = 3, hjust = 1) +
+  geom_text_repel(aes(label = column), size = 5, hjust = 1) +
   labs(
     title = "Contributions of Phyla and Diet to PC1 and PC2",
     x = "PC1 Contributions",
@@ -178,6 +184,8 @@ pca3 <- ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     legend.position = "none",
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
     panel.grid.major = element_blank()
   )
 

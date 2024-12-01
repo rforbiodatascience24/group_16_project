@@ -29,7 +29,6 @@ library("tidyverse")
 ::: {.column width="50%"}
 ![](images/article_title.png)
 
-
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
 -   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
@@ -243,26 +242,26 @@ head(clean_df_augm)
 
 -   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
 
-![](images/pc1vspc2-06.png){width="746"}
+![](images/pc1vspc2-08.png){width="696"}
 :::
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
 ::: columns
-::: {.column width="50%" style="text-align: center; font-size: 23px;"}
+::: {.column width="40%" style="text-align: center; font-size: 23px;"}
 -   The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability
 
-![](images/pca_variance-13.png){width="578"}
+![](images/pca_variance-14.png){width="580"}
 :::
 
-::: {.column width="50%" style="text-align: center; font-size: 22px;"}
-![](images/pca_contributions-11.png){width="578"}
+::: {.column width="60%" style="text-align: center; font-size: 22px;"}
+![](images/pca_contributions-13.png){width="580"}
 
 -   Western diet correlates with a negative PC1 coordinate, which aligns with Western diet observations found on the left of the previous scatter plot.
 
 -   **Unclassified** phyla present an opposite behavior to the diet variable.
 
--   ***Bacteroidetes*** and ***Firmicutes*** also exhibit opposite behaviors, consistent with their biological significance
+-   ***Bacteroidetes*** and ***Firmicutes*** also exhibit opposite behaviors, consistent with their biological significance.
 :::
 :::
 
