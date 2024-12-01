@@ -176,7 +176,12 @@ pca3 <- ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
     legend.position = "none",
     panel.grid.major = element_blank()
   )
-ggsave("../results/pca_contributions.png", plot = pca3, width = 8, height = 6, units = "in", bg = "white")
+ggsave("../results/pca_contributions.png", 
+       plot = pca3, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
 ```
 
 The biplot illustrates the contributions of the variables to the first two principal components (PC1 and PC2). From this, we can extract several conclusions:
@@ -185,11 +190,11 @@ The biplot illustrates the contributions of the variables to the first two princ
 
 -   **Unclassified** phyla present an opposite behavior to the diet variable. This is in line with the barplots presented in the description section, which showed more OTUs from unclassified phyla could be found in the LFPP diet.
 
--   **Bacteroidetes** and **Firmicutes** also exhibit opposite behaviors, consistent with their biological significance. As explained in other sections, the ratio of Firmicutes to Bacteroidetes serves as a well-established marker for obesity.
+-   ***Bacteroidetes*** and ***Firmicutes*** also exhibit opposite behaviors, consistent with their biological significance. As explained in other sections, the ratio of *Firmicutes* to *Bacteroidetes* serves as a well-established marker for obesity.
 
--   **Verrucomicrobia** and **Proteobacteria** cluster together, contributing to PC2.
+-   ***Verrucomicrobia*** and ***Proteobacteria*** cluster together, contributing to PC2.
 
--   The **Actinobacteria** vector has the same direction as Firmicutes, but is of a much smaller magnitude. This is due to the fact that the relative abundance of OTUs belonging to this phylum varies less.
+-   The ***Actinobacteria*** vector has the same direction as *Firmicutes*, but is of a much smaller magnitude. This is due to the fact that the relative abundance of OTUs belonging to this phylum varies less.
 
 This plot emphasizes that a few dominant phyla drive the main axes of variation in microbial communities, underscoring the importance of these phyla in shaping the microbial composition and potentially influencing host health outcomes.
 
@@ -238,7 +243,7 @@ otu_data_with_metadata <- otu_data_scaled |>
 
 #### 2. Hierarchical Clustering
 
-We compute a **distance matrix** using the Euclidean distance to measure similarity between microbiome samples. The clustering is performed using Ward’s method, which minimizes variance within clusters.
+We compute a **distance matrix** using the Euclidean distance to measure similarity between microbiome samples. The clustering is performed using **Ward’s method**, which minimizes variance within clusters.
 
 ```{r}
 # Compute Euclidean distance matrix
@@ -326,4 +331,4 @@ chi2_result <- chisq.test(donor_cluster_table)
 chi2_result
 ```
 
-The hierarchical clustering results reveal distinct donor distributions. **Cluster 1** is dominated by **HMouseLFPP** (55.5%) with notable contributions from **Frozen** (17.8%) and **Fresh** (18.7%), reflecting plant-rich diets and preserved samples. **Cluster 2** includes mostly **Fresh** (55.1%) and **HMouseLFPP** (26.5%), indicating a mix of human-derived and dietary influences. **Cluster 3** is almost entirely **CONVR** (95%), representing natural microbiota from control mice. The chi-squared test (p \< 2.2e-16) confirms significant associations between donor origins and clusters, highlighting the influence of donors on microbiota composition.
+The hierarchical clustering results reveal distinct donor distributions. **Cluster 1** is dominated by **HMouseLFPP** (55.5%) with notable contributions from **Frozen** (17.8%) and **Fresh** (18.7%), reflecting plant-rich diets and preserved samples. **Cluster 2** includes mostly **Fresh** (55.1%) and **HMouseLFPP** (26.5%), indicating a mix of human-derived and dietary influences. **Cluster 3** is almost entirely **CONVR** (95%), representing natural microbiota from control mice. The chi-squared test (p-value \< 2.2e-16) confirms significant associations between donor origins and clusters, highlighting the influence of donors on microbiota composition.

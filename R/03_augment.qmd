@@ -11,8 +11,8 @@ editor: visual
 
 ```{r}
 #| message: false 
-library(tidyverse) 
-library(readr)
+library("tidyverse") 
+library("readr")
 ```
 
 ### 2. Read data
