@@ -55,7 +55,7 @@ To study the relationship between the composition of the gut microbiota and fact
 ![](images/workflow.png)
 :::
 
-::: {.column width="50%"}
+::: {.column width="50%" style="font-size: 25 px"}
 ```{r}
 data_folder <- "../data"
 
@@ -219,13 +219,13 @@ head(clean_df_augm)
 
 ::: columns
 ::: {.column width="50%"}
--   **sources and diet types**
+-   **Sources and Diet Types**
 
     ![](images/phyla_sour_diet.png){width="750"}
 :::
 
 ::: {.column width="50%"}
--   **diet and donor combination**
+-   **Diet and Donor Combination**
 
     ![](images/phyla_don_diet.png){width="750"}
 :::
@@ -233,7 +233,7 @@ head(clean_df_augm)
 
 </div>
 
-## 05
+## Analyses
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
