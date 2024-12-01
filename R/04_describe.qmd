@@ -66,7 +66,7 @@ There are only female mice in the humanized mouse with LFPP diet graft, and the 
 ### Microbiota composition in terms of phyla and class in different sources and diet types
 
 ```{r}
-clean_df |> 
+plot1 <- clean_df |> 
   filter(Diet %in% c("LFPP", "Western")) |> 
   filter(Source != "Stomach") |> # Filter out the stomach samples as there are none in LFPP
   group_by(Source, Diet) |> 
@@ -92,7 +92,17 @@ clean_df |>
   theme_minimal() +
   theme(legend.position = "bottom", # change when data augmentation has been done
         legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+        axis.text.x = element_text(angle = 45, 
+                                   hjust = 1))
+
+ggsave("../results/rel_abund_phyla_source_diet.png", 
+       plot = plot1, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
+
+plot1
 ```
 
 This plots represents the differences in microbiome phyla (in terms of relative abundance) found among different parts of the gut and feces in two different diets: LFFP and Western diet. Simply by observing the figure we can obtain valuable insights.
@@ -108,7 +118,7 @@ These differences in relative abundance indicate a modulation of the microbiome 
 In order to compare the general composition of the microbiota in the mice with different donor and diet, we may represent the relative abundance of the most prevalent phyla.
 
 ```{r}
-clean_df |> 
+plot2 <- clean_df |> 
   filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fecal" ) |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
@@ -134,6 +144,13 @@ clean_df |>
   theme(legend.position = "bottom",
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave("../results/rel_abund_diet_donor_comb.png", 
+       plot = plot2, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
 
 ```
 

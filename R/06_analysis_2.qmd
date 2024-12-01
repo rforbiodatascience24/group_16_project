@@ -94,7 +94,12 @@ pca1 <- ggplot(pca_variance, aes(x = PC, y = percent)) +
   geom_hline(yintercept = 0.9, linetype = "dashed", size = 0.5) + # Add line at 90% variance explained
   annotate("text", x = 3.5, y = 0.95, label = "90%", size = 5, hjust = 0) #we add an annotation with the 90%
 
-ggsave("../results/pca_variance.png", plot = pca1, width = 8, height = 6, units = "in", bg = "white")
+ggsave("../results/pca_variance.png", 
+       plot = pca1,
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
 ```
 
 The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
@@ -124,7 +129,12 @@ pca2 <- otu_data_pca |>
     legend.position = "right"     
   )
 
-ggsave("../results/pc1vspc2.png", plot = pca2, width = 8, height = 6, units = "in", bg = "white")
+ggsave("../results/pc1vspc2.png", 
+       plot = pca2, 
+       width = 8, 
+       height = 6, 
+       units = "in", 
+       bg = "white")
 ```
 
 The plot shows clear clustering according to diet, with observations of the LFPP diet accumulating on the lower right corner of the grid.

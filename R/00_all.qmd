@@ -43,11 +43,11 @@ This document compiles all the other Quarto documents:
 ## Analysis 2
 
 ```{r}
-#| child: "06_analysis_1.qmd"
+#| child: "06_analysis_2.qmd"
 ```
 
 ## Analysis 3
 
 ```{r}
-#| child: "07_analysis_1.qmd"
+#| child: "07_analysis_3.qmd"
 ```
