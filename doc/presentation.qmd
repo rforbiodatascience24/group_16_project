@@ -29,7 +29,6 @@ library("tidyverse")
 ::: {.column width="50%"}
 ![](images/article_title.png)
 
-
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
 -   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
@@ -220,13 +219,13 @@ head(clean_df_augm)
 
 ::: columns
 ::: {.column width="50%"}
--   **sources and diet types**
+-   **Sources and Diet Types**
 
     ![](images/phyla_sour_diet.png){width="750"}
 :::
 
 ::: {.column width="50%"}
--   **diet and donor combination**
+-   **Diet and Donor Combination**
 
     ![](images/phyla_don_diet.png){width="750"}
 :::
@@ -234,7 +233,7 @@ head(clean_df_augm)
 
 </div>
 
-## 05
+## Analyses
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
