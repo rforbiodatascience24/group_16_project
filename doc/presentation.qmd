@@ -55,7 +55,7 @@ To study the relationship between the composition of the gut microbiota and fact
 ![](images/workflow.png)
 :::
 
-::: {.column width="50%"}
+::: {.column width="50%" style="font-size: 25 px"}
 ```{r}
 data_folder <- "../data"
 
