@@ -21,15 +21,13 @@ editor: visual
 
 ## Objective and Main Research Questions
 
-![](./images/article_title.png){.absolute top=200 left=0 width="1200" height="400"}
+![](./images/article_title.png){.absolute top="200" left="0" width="1200" height="400"}
 
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
--    Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
+-   Measuring the effects of diet (Western or Low-Fat Plant Polysaccharide-rich), temporal and spatial composition of the microbiota, colonisation history...
 
-![](./mice_experiments.jpg){.absolute top=50 right=50 width="800" height="400"}
-
-#### Our aim:
+Our aim:
 
 To study the relationship between the composition of the gut microbiota and factors such as diet and colonisation history.
 
@@ -330,9 +328,8 @@ clustered_metadata <- filtered_metadata_wider |>
 
 -   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
 
-```{=html}
 <!-- -->
-```
+
 -   PCA shows how diet shapes microbial composition, as well as the relationship between different phyla.
 
 -   Clustering shines light on how the microbiota donor structures the data
