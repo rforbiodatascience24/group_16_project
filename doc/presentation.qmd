@@ -205,7 +205,7 @@ head(clean_df_augm)
 ```
 :::
 
-# Results
+# Results and Discussion
 
 ## Microbiota composition in terms of phyla in different:
 
@@ -320,14 +320,12 @@ clustered_metadata <- filtered_metadata_wider |>
 
 ::: columns
 ::: {.column width="50%"}
-
 **Shannon diversity index**
 
 -   Number of species living in a habitat (**richness**)
 
-```{=html}
 <!-- -->
-```
+
 -   Relative abundance (**evenness**).
 
 $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs} $$
@@ -340,7 +338,7 @@ $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU
 :::
 :::
 
-## Discussion
+# Conclusion
 
 -   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
 
