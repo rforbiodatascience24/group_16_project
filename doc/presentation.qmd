@@ -82,7 +82,6 @@ data_folder <- "../data"
 ::: columns
 ::: {.column width="50%"}
 ```{r}
-{r}
 #| echo: true
 #| eval: false
 #| results: hide
@@ -239,42 +238,31 @@ head(clean_df_augm)
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
-```{r}
-#| include: false
-library(broom)
-library(ggrepel)
-library(cowplot)
-```
+::: {style="text-align: center; font-size: 22px;"}
+-   The clear separation between green and pink points indicates that the microbiome composition is strongly influenced by diet.
 
-::: columns
-::: {.column width="50%" style="font-size: 25px;"}
-```{r}
-#| echo: true
-#| eval: false
-# Aggregate relative abundances by phylum
-aggregated_data <- clean_df_augm |>
-  filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
-  group_by(SampleID, Phylum, Diet) |> 
-  summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
+-   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
 
-# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
-aggregated_wide <- aggregated_data |> 
-  pivot_wider(names_from = Phylum, values_from = rel_abundance) |> 
-  mutate(Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1)) #pca uses numerical values so we modify the diet column
-
-# Check of the aggregated data
-head(aggregated_wide)
-```
-
-![](images/pca_variance-01.png){width="800"}
-:::
+![](images/pc1vspc2-06.png){width="746"}
 :::
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
 ::: columns
-::: {.column width="50%"}
-![![](images/clipboard-1125396256.png)](images/pca_contributions-06.png){width="700"}
+::: {.column width="50%" style="text-align: center; font-size: 23px;"}
+-   The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability
+
+![](images/pca_variance-13.png){width="578"}
+:::
+
+::: {.column width="50%" style="text-align: center; font-size: 22px;"}
+![](images/pca_contributions-11.png){width="578"}
+
+-   Western diet correlates with a negative PC1 coordinate, which aligns with Western diet observations found on the left of the previous scatter plot.
+
+-   **Unclassified** phyla present an opposite behavior to the diet variable.
+
+-   ***Bacteroidetes*** and ***Firmicutes*** also exhibit opposite behaviors, consistent with their biological significance
 :::
 :::
 
