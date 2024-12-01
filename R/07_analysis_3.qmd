@@ -1,6 +1,6 @@
 ---
 title: "07_analysis_3"
-author: "Elena Iriondo"
+author: "Eric Torres, Lucía de Lamadrid, Elena Iriondo, Konstantina Gkopi and Jorge Santiago"
 format: html
 editor: visual
 ---
@@ -9,7 +9,7 @@ Load packages
 
 ```{r}
 #| message: false 
-library(dplyr)
+library("tidyverse")
 ```
 
 Read data
@@ -59,7 +59,7 @@ t_test_result <- shannon |>
 t_test_result
 ```
 
-The result of the t test is that the means of the Shannon index for each diet are (very) significantly different. We can now represent this result in a barplot, showing the standard deviation as error.
+The result of the *t* test is that the means of the Shannon index for each diet are (very) significantly different. We can now represent this result in a barplot, showing the standard deviation as error.
 
 ```{r}
 shannon |> group_by(Diet) |>

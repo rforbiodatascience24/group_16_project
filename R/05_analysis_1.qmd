@@ -1,6 +1,6 @@
 ---
 title: "05_analysis_1"
-author: Eric Torres, Lucía de Lamadrid, Elena Iriondo
+author: Eric Torres, Lucía de Lamadrid, Elena Iriondo, Konstantina Gkopi and Jorge Santiago
 format: html
 editor: visual
 ---

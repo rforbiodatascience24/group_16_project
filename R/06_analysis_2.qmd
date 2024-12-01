@@ -1,6 +1,6 @@
 ---
 title: "06_analysis_2"
-author: Konstantina Gkopi and Elena Iriondo
+author: Eric Torres, Lucía de Lamadrid, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format: html
 editor: visual
 ---
@@ -13,10 +13,10 @@ In this section, we perform PCA on microbiome data aggregated at the phylum leve
 
 ```{r}
 #| message: false 
-library(tidyverse)
-library(broom)
-library(ggrepel)
-library(cowplot)
+library("tidyverse")
+library("broom")
+library("ggrepel")
+library("cowplot")
 ```
 
 #### 2. Load data
@@ -71,8 +71,6 @@ pca_variance <- otu_data_pca |>
 
 pca_variance
 ```
-
-ggsave("../results/pca_variance.png", plot = pca1, width = 8, height = 6, units = "in", bg = "white")
 
 ```{r}
 # Plot variance explained by PCs

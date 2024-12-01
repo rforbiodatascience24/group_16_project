@@ -1,6 +1,6 @@
 ---
 title: "00_all"
-author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi and Jorge Santiago
+author: Lucía de Lamadrid, Eric Torres, Konstantina Gkopi, Elena Iriondo and Jorge Santiago
 format:
   html:
     embed-resources: true
