@@ -80,14 +80,9 @@ In the `otu_df` there are two types of separators (`\t` followed by `,`) in the 
 
 ```{r}
 otu_df <- otu_df |> 
-<<<<<<< HEAD
-  mutate(across(everything(), ~gsub("\t", "", .x)))
-# Change columns in all dataset taken from "https://stackoverflow.com/questions/43456687/using-dplyr-gsub-on-many-columns"
-=======
   mutate(across(everything(), 
                 ~gsub("\t", "", .x)))
 # change columns in all dataset taken from "https://stackoverflow.com/questions/43456687/using-dplyr-gsub-on-many-columns"
->>>>>>> main
 ```
 
 ### 3. Create .tsv files
