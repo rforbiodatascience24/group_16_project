@@ -40,7 +40,6 @@ The original dataset has dimensions $N = 675$ and $M = 6702$.
 As the dataset lacks of an identifier which can act as primary key, we introduce a numeric surrogate key using the row number (SampleID):
 
 ```{r}
-
 #| message: false 
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |> 
@@ -107,7 +106,7 @@ As a result, we get a dataframe of $N = 4,519,800$ !
 
 To reduce the size of the dataset from the original $N = 4,519,800$ rows and focus on meaningful OTUs, we apply filtering to remove low-abundance and negligible contributors.
 
-We calculated the mean relative abundance of each OTU, ranked them in descending order, computed their cumulative contribution to total abundance, and plotted a cumulative contribution curve to identify key OTUs contributing significantly to the microbiome.
+We calculate the mean relative abundance of each OTU, ranked them in descending order, computed their cumulative contribution to total abundance, and plotted a cumulative contribution curve to identify key OTUs contributing significantly to the microbiome.
 
 ```{r}
 # Calculate cumulative contribution
@@ -150,8 +149,6 @@ From the plot above, we can see that a little fraction of all the OTUs contribut
 
 Note: we are doing an assumption that the most abundant OTUs are the ones with the biggest biological importance. This is not always true, like the case of keystone species, which exert big influence despite their low abundance.
 
-summarise(rows = n())
-
 ```{r}
 # Filter OTUs contributing to 95% cumulative abundance
 otus_to_keep <- cumulative_otus |>
@@ -186,7 +183,7 @@ cat("Number of OTUs removed:", n_total_otus - n_filtered_otus, "\n")
 cat("Percentage of OTUs removed:", (n_total_otus - n_filtered_otus) * 100 / n_total_otus, "% \n")
 ```
 
-As a result of the filtering, we have narrowed down the number of OTUs from **6,696 OTUs to 392**, **6,304 OTUs** were removed.
+As a result of the filtering, we have narrowed down the number of OTUs from **6,696 OTUs to 392**, effectively removing **6,304 OTUs**.
 
 We check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them. To get a good 'visualisation resolution', we use a log-scale.
 
@@ -275,7 +272,7 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
 head(filtered_metadata_stricter_label)
 ```
 
-Some subsequent analyses will require us to use a wide dataset:
+Even though we have previously tidied the data into a long format, some subsequent analyses will require us to use a wide dataset:
 
 ```{r}
 filtered_metadata_wider <- filtered_metadata_stricter_label |> 
