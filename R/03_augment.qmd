@@ -24,16 +24,12 @@ head(clean_df)
 
 In this section, we'll be working with the OTUs taxonomy file, so let's load it as well.
 
-<<<<<<< HEAD
 ```{r}
 otu_df_original <- read.table('../data/01_data_otu.tsv', header = TRUE, sep = ",")
 head(otu_df_original)
 ```
 
-The different columns in the OTU data are: Domain, Phylum, Class, Order, Family, Genus and Species.
-=======
 Note: The file `../data/01_data_otu.tsv` is misformatted. It is a TSV file but uses commas as separators. Therefore, we need to use `read.table` and explicitly specify the separator as a comma (`,`).
->>>>>>> main
 
 ```{r}
 otu_df_original <- read.table('../data/01_data_otu.tsv', 
@@ -76,33 +72,12 @@ Such delirium of dataset is the result of complete lack of manual curation and c
 The taxonomical information of some OTUs is missing. For these cases, we are going to use the label "Unclassified":
 
 ```{r}
-<<<<<<< HEAD
 otu_df_modified <-  otu_df_original |> 
   select(OTU.ID, Phylum, Class) |> 
   mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
   mutate(Class = if_else(Class == "", "Unclassified", Class))
 
-# head(otu_df_modified)
-=======
-otu_df_modified <- otu_df_original |> 
-  select(
-    OTU.ID, 
-    Phylum, 
-    Class
-  ) |> 
-  mutate(Phylum = if_else(
-    Phylum == "",
-    "Unclassified",
-    Phylum)
-  ) |> 
-  mutate(Class = if_else(
-    Class == "", 
-    "Unclassified", 
-    Class)
-  )
-
 head(otu_df_modified)
->>>>>>> main
 ```
 
 After that, we perform a left join to include the taxonomical information into the data frame:
@@ -139,12 +114,6 @@ head(phylum_aggregated_wide)
 ```
 
 ```{r}
-<<<<<<< HEAD
-write.table(clean_df, "../data/03_metadata_long_filtered_taxonom.tsv", sep = "\t", 
-            quote = FALSE, 
-            col.names = NA)
-=======
 write_tsv(phylum_aggregated_wide, 
           "../data/03_metadata_wide_phylum.tsv")
->>>>>>> main
 ```
