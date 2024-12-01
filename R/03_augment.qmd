@@ -122,13 +122,5 @@ head(phylum_aggregated_wide)
 
 ```{r}
 write_tsv(phylum_aggregated_wide, 
-            "../data/03_metadata_wide_phylum.tsv")
-```
-
-```{r}
-otu_columns <- phylum_aggregated_wide |> 
-  select(-Diet, -Donor, -SampleID) 
-
-row_sums <- rowSums(otu_columns)
-summary(row_sums)
+          "../data/03_metadata_wide_phylum.tsv")
 ```
