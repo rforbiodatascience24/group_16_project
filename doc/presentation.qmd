@@ -29,7 +29,6 @@ library("tidyverse")
 ::: {.column width="50%"}
 ![](images/article_title.png)
 
-![](./images/article_title.png){.absolute top="200" left="0" width="1200" height="400"}
 
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
@@ -68,7 +67,7 @@ data_folder <- "../data"
 :::
 :::
 
-## Data Tidying and Filtering
+## Data tidying and filtering
 
 -   Added a SampleID column to uniquely identify each sample.
 
@@ -78,11 +77,10 @@ data_folder <- "../data"
 
 -   Replaced the numeric codes with descriptive labels.
 
-::: {style="font-size: 30px;"}
+::: {style="font-size: 20px;"}
 ::: columns
 ::: {.column width="50%"}
 ```{r}
-{r}
 #| echo: true
 #| eval: false
 #| results: hide
@@ -161,6 +159,7 @@ head(filtered_metadata_stricter_label)
 :::
 
 ::: {.column width="50%"}
+![](images/cumulative_abundance_OTU.png)
 :::
 :::
 :::
