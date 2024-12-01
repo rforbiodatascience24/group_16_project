@@ -21,32 +21,23 @@ library("cowplot")
 
 #### 2. Load data
 
-For this analysis we will use the "03_metadata_long_filtered_taxonom.tsv" data frame, that contains metadata, OTU counts and taxonomic information for each sample.
+For this analysis we will use the "03_metadata_wide_phylum.tsv" data frame, which contains metadata, relative abundances of taxonomic phyla, and diet information for each sample.
 
 ```{r}
 # load data
-clean_df_augm <- read_tsv("../data/03_metadata_long_filtered_taxonom.tsv")
-head(clean_df_augm)
+clean_df_wide <- read_tsv("../data/03_metadata_wide_phylum.tsv")
+head(clean_df_wide)
 ```
 
 #### 3. Prepare data for PCA
 
-To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanised mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
+To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanized mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
 
 ```{r}
-# Aggregate relative abundances by phylum
-aggregated_data <- clean_df_augm |>
+otu_data_pca <- clean_df_wide |>
   filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
-  group_by(SampleID, Phylum, Diet) |> 
-  summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
-
-# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
-aggregated_wide <- aggregated_data |> 
-  pivot_wider(names_from = Phylum, values_from = rel_abundance, values_fill = 0) |> 
-  mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
-
-# Check of the aggregated data
-head(aggregated_wide)
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1)) |> #pca uses numerical values so we modify the diet column
+  select(-SampleID, -Donor) #remove categorical columns as this categorical variable adds no information
 ```
 
 #### 4. Performing PCA
@@ -54,9 +45,8 @@ head(aggregated_wide)
 Using the aggregated data, we scale the phylum-level abundances and apply PCA. This identifies the key axes of variation in the dataset, summarizing complex microbial community structures into principal components.
 
 ```{r}
-# Scale the aggregated data and perform PCA
-otu_data_pca <- aggregated_wide |> 
-  select(-SampleID) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
+otu_data_pca_scale <- otu_data_pca |> 
+  # Scale the aggregated data and perform PCA
   scale() |> 
   prcomp()
 ```
@@ -100,17 +90,19 @@ ggsave("../results/pca_variance.png",
        height = 6, 
        units = "in", 
        bg = "white")
+
+pca1
 ```
 
-The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
+The PCA variance table shows that PC1 and PC2 together explain 55.34% of the total variance, with PC1 accounting for 38.94% and PC2 for 16.39%. Including PC3 and PC4 increases the cumulative explained variance to 80.95%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
 
 #### 6. **Visualizing PC1 vs PC2**
 
 We plot the first two principal components (PC1 and PC2) to visualize the differences between diets.
 
 ```{r}
-pca2 <- otu_data_pca |> 
-  augment(aggregated_wide) |> 
+pca2 <- otu_data_pca_scale |> 
+  augment(otu_data_pca) |> 
   ggplot(aes(.fittedPC1, .fittedPC2, fill = factor(Diet))) +  # Map fill to factor
   geom_point(size = 3, shape = 21) +                          # Adjust point size and shape
   scale_fill_manual(                                         # Manually define colors and labels
@@ -135,6 +127,8 @@ ggsave("../results/pc1vspc2.png",
        height = 6, 
        units = "in", 
        bg = "white")
+
+pca2
 ```
 
 The plot shows clear clustering according to diet, with observations of the LFPP diet accumulating on the lower right corner of the grid.
@@ -148,7 +142,7 @@ Now, we will represent the individual contributions of each variable to the firs
 arrow_style <- arrow(
   angle = 25, ends = "first", type = "closed", unit(0.2, "cm")
 )
-rotation_matrix <- otu_data_pca |> tidy(matrix = "rotation")
+rotation_matrix <- otu_data_pca_scale |> tidy(matrix = "rotation")
 
 rotation_pivot <- rotation_matrix |>
   filter(PC %in% c(1, 2)) |>
@@ -176,12 +170,15 @@ pca3 <- ggplot(rotation_pivot, aes(x = PC1, y = PC2, color = column)) +
     legend.position = "none",
     panel.grid.major = element_blank()
   )
+
 ggsave("../results/pca_contributions.png", 
        plot = pca3, 
        width = 8, 
        height = 6, 
        units = "in", 
        bg = "white")
+
+pca3
 ```
 
 The biplot illustrates the contributions of the variables to the first two principal components (PC1 and PC2). From this, we can extract several conclusions:
@@ -216,8 +213,7 @@ otu_data <- filtered_metadata_wider |>
   select(starts_with("OTU"))
 
 # Check the dimensions of the OTU data
-head(otu_data)
-
+dim(otu_data)
 ```
 
 #### **Standardization**

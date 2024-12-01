@@ -22,9 +22,7 @@ palette.pals()
 ### Read data
 
 ```{r}
-clean_df <- read.table('../data/03_metadata_long_filtered_taxonomy.tsv', 
-                       header=TRUE, 
-                       sep='\t')
+clean_df <- read_tsv('../data/03_metadata_long_filtered_taxonomy.tsv')
 head(clean_df)
 ```
 
