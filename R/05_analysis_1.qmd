@@ -70,7 +70,7 @@ To identify which OTUs are significantly associated with diet, a linear model is
 ```{r}
 diet_phylum_nested <- diet_phylum_nested |> 
   group_by(OTU) |>  
-  mutate(model_object = map (.x = data, 
+  mutate(model_object = map(.x = data, 
                              .f = ~lm(formula = rel_abundance ~ Diet, 
                                       data = .x)))
 ```
