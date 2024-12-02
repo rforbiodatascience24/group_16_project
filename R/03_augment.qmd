@@ -24,11 +24,6 @@ head(clean_df)
 
 In this section, we'll be working with the OTUs taxonomy file, so let's load it as well.
 
-```{r}
-otu_df_original <- read.table('../data/01_data_otu.tsv', header = TRUE, sep = ",")
-head(otu_df_original)
-```
-
 Note: The file `../data/01_data_otu.tsv` is misformatted. It is a TSV file but uses commas as separators. Therefore, we need to use `read.table` and explicitly specify the separator as a comma (`,`).
 
 ```{r}
