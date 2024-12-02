@@ -6,54 +6,63 @@ format:
     embed-resources: true
 ---
 
-# Main report
+# Run-all quarto documents in this folder
 
-This document compiles all the other Quarto documents:
+This script is running the entire program, by running all the quarto documents in the folder and rendering them to .html.
 
 ```{r}
-#| message: false 
-rm(list=ls())
+# Load libraries
+library("tidyverse")
 library("quarto")
+library("fs")
+library("here")
 ```
 
-## Load data
+We are going to find all the Quarto documents in the R folder (i.e, those that end in .qmd, with the exception of 00_all.qmc)
 
 ```{r}
-quarto::quarto_render("01_load.qmd")
+source_dir <- here("R")
+
+# List all .qmd files in the directory, with the exception of 00_all.qmd
+qmd_files <- dir_ls(source_dir, glob = "*.qmd") |> 
+  discard(~ basename(.x) == "00_all.qmd")  
+
+cat("The following files will be rendered:\n")
+print(qmd_files)
+
+# Render each file
+qmd_files |> 
+  walk(~ quarto_render(.x))
+
+cat("Rendering complete.\n")
 ```
 
-## Clean data
+Then, we will move the .html files to the results folder. In the source directory, some folders (whose name end with "\_files") are also created, which include the figures of the plots in their respective Quarto document. We don't want to keep them, because these figures are already being saved in the results folder when executing the .qmd files.
 
 ```{r}
-quarto::quarto_render("02_clean.qmd")
-```
+destination_dir <- here("results")
 
-## Augment data
+# Create the destination folder in case it does not exist
+dir_create(destination_dir)
 
-```{r}
-quarto::quarto_render("03_augment.qmd")
-```
 
-## Description and Visualization
+rendered_files <- dir_ls(source_dir, glob = "*.html")
+cat("Moving the following rendered files to the results folder:\n")
+print(rendered_files)
 
-```{r}
-quarto::quarto_render("04_describe.qmd")
-```
+# Move the rendered files (.html) to the results directory
+rendered_files |> 
+  walk(~ file_move(.x, path(destination_dir, basename(.x))))
 
-## Analysis 1
 
-```{r}
-quarto::quarto_render("05_analysis_1.qmd")
-```
+# Remove '_files' folders
+folders_to_remove <- dir_ls(source_dir, type = "directory") |> 
+  keep(~ str_detect(basename(.x), "_files$"))
+cat("Removing the following '_files' folders:\n")
+print(folders_to_remove)
 
-## Analysis 2
+folders_to_remove |> 
+  walk(dir_delete)
 
-```{r}
-quarto::quarto_render("06_analysis_2.qmd")
-```
-
-## Analysis 3
-
-```{r}
-quarto::quarto_render("07_analysis_3.qmd")
+cat("File move and folder cleanup complete.\n")
 ```
