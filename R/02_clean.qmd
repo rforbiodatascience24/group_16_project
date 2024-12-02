@@ -145,7 +145,10 @@ cumulative_plot <- ggplot(
        y = "Cumulative Abundance") +  
 theme(axis.text.x = element_blank(), 
       axis.ticks.x = element_blank(), 
-      plot.title = element_text(hjust = 0.5)
+      axis.text.y = element_text(size = 14),
+      axis.title.x = element_text(size = 15), 
+      axis.title.y = element_text(size = 15),
+      plot.title = element_text(hjust = 0.5, size = 17)
 )
 
 cumulative_plot
@@ -200,7 +203,7 @@ cat("Percentage of OTUs removed:", (n_total_otus - n_filtered_otus) * 100 / n_to
 
 As a result of the filtering, we have narrowed down the number of OTUs from **6,696 OTUs to 392**, **6,304 OTUs** were removed.
 
-We check the distribution of OTU relative abundances to understand the range and frequency of abundance values after having filter them. To get a good 'visualisation resolution', we use a log-scale.
+We check the distribution of average relative abundances of the kept OTUs to understand the range and frequency of the abundance values after having filtered the dataset. To get a good 'visualisation resolution', we use a log-scale.
 
 ```{r}
 # Distribution of OTU relative abundances
@@ -208,11 +211,8 @@ filtered_otus <- filtered_metadata |>
   group_by(OTU) |>
   summarize(mean_abundance = mean(rel_abundance)) 
 
-
-ggplot(
-  data = filtered_otus, 
-  mapping = aes(x = mean_abundance)
-  ) +
+filtered_otus |>  
+ggplot(aes(x = mean_abundance)) +
   geom_histogram(bins = 20, 
                  fill = "skyblue", 
                  alpha = 0.7) +
@@ -223,6 +223,8 @@ ggplot(
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+We see a negative binomial distribution that indicates that most OTUs have a mean low relative abundance whilst only a few of them have notable average values of relative abundance.
 
 Finally, we can replace the numeric codes with descriptive labels. This includes variables such as Sex or Diet. To do so, we need the equivalences provided by the dictionary dataframe:
 
