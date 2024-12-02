@@ -22,6 +22,8 @@ library("readr")
 With the following code chunk, data is accessed programmatically from an ID in Google Drive. The user has to authenticate defined with their Google account in order to retrieve the datasets:
 
 ```{r}
+#| message: FALSE 
+
 # Definition of the folder in which we will store the datasets
 raw_folder <- "../_raw"
 
