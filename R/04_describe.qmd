@@ -60,7 +60,7 @@ As seen in the plot above there are no data for female mice in the first generat
 ```{r}
 clean_df |> 
   group_by(Donor, Sex) |> 
-  count(Sex)
+  summarise(count = n())
 ```
 
 There are only female mice in the humanized mouse with LFPP diet graft, and the differences in sample size are huge in comparison to male individuals. Thus, this analysis cannot be done.
