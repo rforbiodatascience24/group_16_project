@@ -364,7 +364,7 @@ contingency_table
 
 ::: columns
 ::: {.column width="40%" style="text-align: center; font-size: 23px;"}
--   The PCA variance table shows that PC1 and PC2 together explain \~55 of the total variance. Including PC3, PC4 and PC5 increases the cumulative explained variance to 90%, capturing most of the dataset’s variability
+-   The PCA variance table shows that PC1 and PC2 together explain \~55 of the total variance. Including PC3, PC4 and PC5 increases the cumulative explained variance to 90%, capturing most of the dataset’s variability.
 
 ![](images/pca_variance-12.png){width="641"}
 :::
@@ -500,9 +500,9 @@ chi2_result
 
 ::: columns
 ::: {.column width="50%"}
-**Shannon diversity index**
+**Shannon diversity index:**
 
--   Number of species living in a habitat (**richness**)
+-   Number of species living in a habitat (**richness**).
 
 <!-- -->
 
@@ -520,12 +520,12 @@ $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU
 
 # Conclusions
 
--   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
+-   The "obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio.
 
 <!-- -->
 
 -   PCA shows how diet shapes microbial composition, as well as the relationship between different phyla.
 
--   Clustering shines light on how the microbiota donor structures the data
+-   Clustering shines light on how the microbiota donor structures the data.
 
--   The Western diet favours a more biodiverse gut ecosystem
+-   The Western diet favours a more biodiverse gut "ecosystem".
