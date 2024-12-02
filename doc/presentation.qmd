@@ -164,7 +164,7 @@ head(filtered_metadata_stricter_label)
 :::
 
 ::: {.column width="50%" style="text-align: center;"}
-![](images/cumulative_abundance_OTU.png){fig-align="center" width="754"}
+![](images/cumulative_abundance_OTU-01.png){fig-align="center" width="754"}
 :::
 :::
 :::
@@ -211,13 +211,13 @@ head(clean_df_taxonomy)
 ::: {.column width="50%"}
 -   **Sources and Diet Types**
 
-    ![](images/phyla_sour_diet.png){width="750"}
+    ![](images/rel_abund_phyla_source_diet-01.png){width="750"}
 :::
 
 ::: {.column width="50%"}
 -   **Diet and Donor Combination**
 
-    ![](images/phyla_don_diet.png){width="750"}
+    ![](images/rel_abund_diet_donor_comb.png){width="750"}
 :::
 :::
 
@@ -356,11 +356,11 @@ contingency_table
 ::: {.column width="40%" style="text-align: center; font-size: 23px;"}
 -   The PCA variance table shows that PC1 and PC2 together explain most of the total variance (\~60%). Including PC3 and PC4 increases the cumulative explained variance to 90%, capturing most of the dataset’s variability
 
-![](images/pca_variance-10.png){fig-align="center"}
+![](images/pca_variance-11.png){fig-align="center"}
 :::
 
 ::: {.column width="60%" style="text-align: center; font-size: 22px;"}
-![](images/pca_contributions-07.png){fig-align="center" width="641"}
+![](images/pca_contributions-08.png){fig-align="center"}
 
 -   Western diet correlates with a negative PC1 coordinate, which aligns with Western diet observations found on the left of the previous scatter plot.
 
@@ -377,7 +377,7 @@ contingency_table
 
 -   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
 
-![](images/pc1vspc2-08.png){fig-align="center" width="718"}
+![](images/pc1vspc2-06.png){fig-align="center"}
 :::
 
 ## Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
@@ -486,7 +486,7 @@ chi2_result
 :::
 
 ::: {.column width="50%"}
-![](images/clusters-05.png){fig-align="center" width="690"}
+![](images/clusters-04.png){fig-align="center" width="690"}
 :::
 :::
 
