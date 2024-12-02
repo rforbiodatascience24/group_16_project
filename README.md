@@ -1,6 +1,6 @@
 # Project R for Bio Data Science | group 16 
 
-This repository includes the analysis of data wrangling and visualization of a dataset about the effect of diet on a model of the human gut microbiome. An outline of this project can be found in this [presentation](https://raw.githack.com/rforbiodatascience24/group_16_project/main/doc/presentation.html).
+This repository includes the different analyses of data wrangling, visualization and modelling from a dataset about the effect of diet on a model of the human gut microbiome. An outline of this project can be found in this [presentation](https://raw.githack.com/rforbiodatascience24/group_16_project/main/doc/presentation.html).
 
 ## Project Contributors
 
