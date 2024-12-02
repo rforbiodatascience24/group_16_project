@@ -518,7 +518,7 @@ $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU
 :::
 :::
 
-# Conclusion
+# Conclusions
 
 -   The "Obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio
 
