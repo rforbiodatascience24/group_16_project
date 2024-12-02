@@ -67,3 +67,9 @@ folders_to_remove |>
 
 cat("File move and folder cleanup complete.\n")
 ```
+
+### Rendering the presentation 
+
+```{r}
+quarto::quarto_render(here("doc/presentation.qmd"))
+```
