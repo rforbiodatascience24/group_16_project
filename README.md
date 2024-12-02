@@ -1,6 +1,6 @@
 # Project R for Bio Data Science | group 16 
 
-This repository includes the analysis of data wrangling and visualization of a dataset about the effect of diet on the human gut microbiome. 
+This repository includes the analysis of data wrangling and visualization of a dataset about the effect of diet on a model of the human gut microbiome. An outline of this project can be found in this [presentation](https://raw.githack.com/rforbiodatascience24/group_16_project/main/doc/presentation.html).
 
 ## Project Contributors
 
@@ -18,4 +18,6 @@ The dataset is available in the following link: https://www.exploredata.net/Down
 The data can be retrieved programatically when executing the code, from a file ID on Google Drive. The user needs to login to Google Drive with a valid account to able to download the data. Once logged in a compressed zip folder will start downloading and it will be directed to the _raw/ folder, which is ignored by git to avoid having data on it.  
 
 ## Navigation through this directory 
-* [R](https://github.com/rforbiodatascience24/group_16_project/tree/main/R): this folder contains the scripts for data loading, cleanig, augmentation, description and analysis. 
+* [R](https://github.com/rforbiodatascience24/group_16_project/tree/main/R): this folder contains the scripts for data loading, cleanig, augmentation, description and analysis.
+* [doc](https://github.com/rforbiodatascience24/group_16_project/tree/main/doc): this folder contains all files related to the presentation.
+* [results](https://github.com/rforbiodatascience24/group_16_project/tree/main/results): this folder contains all plots generated in the project.
