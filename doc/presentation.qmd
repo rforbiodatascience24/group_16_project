@@ -10,12 +10,16 @@ format:
     width: 1600   
     height: 800 
     embed-resources: true
-    theme: night
+    theme: moon
     dpi: 300
     template-partials:
       - title-slide.html
 editor: visual
 ---
+
+```{r}
+library("tidyverse")
+```
 
 # Introduction
 
@@ -33,45 +37,60 @@ To study the relationship between the composition of the gut microbiota and fact
 :::
 :::
 
-## Data Loading
+# Materials and Methods
 
-::: {style="font-size: 22px;"}
--   **MicrobiomeWithMetadata.csv** (Main dataset):\
-    Contains the relative abundance of OTUs analyzed per observation, along with the conditions of each sample (e.g., diet, sex, etc.).
+## General Workflow
 
-    ```{r}
-    #| message: false 
-    #| echo: true
-    library(tidyverse) 
-    # Read the data
-    metadata_df <- read_tsv(file = str_c('../data/01_data_metadata.tsv'))
-
-    # Check the structure of the data
-    head(metadata_df)
-    ```
-
--   **MicrobiomeMetadataDictionary.csv** (Complementary):\
-    Provides the equivalence between coded numerical values and their corresponding sample conditions.
-
--   **MicrobiomeOTUtaxonomy.csv** (Complementary):\
-    Contains the taxonomic classification of each OTU analyzed.
-
--   **Source:**\
-    [Explore Microbiome Dataset](https://www.exploredata.net/Downloads/Microbiome-Data-Set)\
-    Curated version of the microbiome dataset from Turnbaugh *et al.* (original publication available in accompanying files).
+::: columns
+::: {.column width="50%"}
+![](images/workflow.png){fig-align="center"}
 :::
 
-# Materials and Methods
+::: {.column width="50%" style="font-size: 30px;"}
+**MICROBIOME METADATA:**
+
+```{r}
+#| echo: false
+#| eval: true
+data_folder <- "../data"
+# Read the data
+metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
+head(metadata_df)
+```
+
+**OTU TAXONOMY GLOSSARY:**
+
+```{r}
+#| echo: false
+#| eval: true
+otu_df_original <- read.table('../data/01_data_otu.tsv', 
+                              header = TRUE, 
+                              sep = ",")
+head(otu_df_original)
+```
+:::
+:::
 
 ## Data Tidying and Filtering
 
 ::: {style="font-size: 20px;"}
--   Added a `SampleID` column to uniquely identify each sample + Transformed the dataset from **wide** to **long** format for easier analysis.
+::: columns
+::: {.column width="50%" style="font-size: 30px;"}
+::: {.nonincremental style="font-size: 25px;"}
+-   Added a SampleID column to uniquely identify each sample.
+
+-   Transformed the dataset from wide to long format for easier analysis.
+
+-   Keeping OTUs contributing up to 95% of cumulative abundance.
+
+-   Replaced the numeric codes with descriptive labels.
+:::
 
 ```{r}
 #| echo: true
-#| output-location: column
-
+#| eval: false
+#| results: hide
+#| code-line-numbers: "2-5|8-11|17-26|38-44"
 # Creation and relocation of SampleID
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |>  # Create SampleID from the first column
@@ -84,47 +103,31 @@ metadata_df_long <- metadata_df |>
     names_to = "OTU", 
     values_to = "rel_abundance"
   )
+
 head(metadata_df_long)
-```
 
--   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance**. Additionally, removed OTUs with extremely low relative abundances.
-
--   Replaced the numeric codes with descriptive labels.
-:::
-
-::: columns
-::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
-```{r}
-#| echo: true
 # Calculate cumulative contribution
 cumulative_otus <- metadata_df_long |>
   group_by(OTU) |>
   summarize(mean_abundance = mean(rel_abundance)) |>
   arrange(desc(mean_abundance)) |>
   mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
+
 # Filter OTUs contributing to 95% cumulative abundance
 otus_to_keep <- cumulative_otus |>
   filter(cumulative_abundance <= 0.95) |>
   pull(OTU)
-# Filter the metadata to retain only these OTUs
-filtered_metadata <- metadata_df_long |>
-  filter(OTU %in% otus_to_keep)
-dim(filtered_metadata)
-# Set the stricter abundance threshold
-abundance_threshold <- 1e-6
-# Apply the threshold to filter OTUs
-filtered_metadata_stricter <- filtered_metadata |>
-  filter(rel_abundance >= abundance_threshold)
-dim(filtered_metadata_stricter)
 
+# Number of OTUs before filtering
+n_total_otus <- metadata_df_long |> 
+  pull(OTU) |> 
+  n_distinct()
 
+# Number of OTUs after filtering
+n_filtered_otus <- filtered_metadata |> 
+  pull(OTU) |> 
+  n_distinct()
 
-```
-:::
-
-::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
-```{r}
-#| echo: true
 filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
   mutate(Diet = case_when(Diet == 0 ~ "LFPP",
                           Diet == 1 ~ "Western",
@@ -156,52 +159,33 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                                    CollectionMet == 1 ~ "Scraping")) |> 
   mutate(Sex = case_when(Sex == 0 ~ "Male",
                          Sex == 1 ~ "Female")) 
+head(filtered_metadata_stricter_label)
 ```
 :::
 
 ::: {.column width="50%" style="text-align: center;"}
-![](images/cumulative_abundance_OTU.png){width="628"}
+![](images/cumulative_abundance_OTU.png){fig-align="center" width="754"}
 :::
-
-### 
 :::
-
 :::
 
 ## Now, our data is tidy!
 
-::: {style="font-size: 35px;"}
+::: {style="font-size: 30px;"}
 ```{r}
-#| echo: true
+#| echo: false
 #| eval: true
 clean_df <- read_tsv('../data/02_metadata_long_filtered_label.tsv')
 head(clean_df)
 ```
 
-and ready to augment it...
-:::
+### and ready to be augmented...
 
-## Our data is tidy... and ready to be augmented!
-
-::: {style="font-size: 27px;"}
+::: {style="font-size: 30px;"}
 We will use the OTUs taxonomy file to add columns with the names of phylum and class for each OTU, using `left_join`.
 
 ```{r}
-#| echo: false
-otu_df_original <- read.table('../data/01_data_otu.tsv', 
-                              header = TRUE, 
-                              sep = ",")
 otu_df_modified <- read_tsv(file = '../data/03_data_otu_modified.tsv')
-
-#| echo: true
-clean_df <- read_tsv('../data/02_metadata_long_filtered_label.tsv')
-head(clean_df)
-```
-
-```         
-:::
-:::
-:::
 ```
 
 ```{r}
@@ -214,6 +198,7 @@ clean_df_taxonomy <- clean_df |>
 
 head(clean_df_taxonomy)
 ```
+:::
 :::
 
 # Results and Discussion
