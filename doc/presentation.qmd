@@ -352,32 +352,32 @@ contingency_table
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
+::: {style="text-align: center; font-size: 23px;"}
+-   The clear separation between green and pink points indicates that the microbiome composition is strongly influenced by diet.
+
+-   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
+
+![](images/pc1vspc2-12.png){width="735"}
+:::
+
+## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
+
 ::: columns
 ::: {.column width="40%" style="text-align: center; font-size: 23px;"}
--   The PCA variance table shows that PC1 and PC2 together explain most of the total variance (\~60%). Including PC3 and PC4 increases the cumulative explained variance to 90%, capturing most of the dataset’s variability
+-   The PCA variance table shows that PC1 and PC2 together explain \~55 of the total variance. Including PC3, PC4 and PC5 increases the cumulative explained variance to 90%, capturing most of the dataset’s variability
 
-![](images/pca_variance-11.png){fig-align="center"}
+![](images/pca_variance-12.png){width="641"}
 :::
 
 ::: {.column width="60%" style="text-align: center; font-size: 22px;"}
-![](images/pca_contributions-08.png){fig-align="center"}
+![](images/pca_contributions-09.png){width="641"}
 
--   Western diet correlates with a negative PC1 coordinate, which aligns with Western diet observations found on the left of the previous scatter plot.
+-   Western diet correlates with a negative PC1 coordinate, which is in line with Western diet observations being found on the left of the previous scatter plot.
 
 -   **Unclassified** phyla present an opposite behavior to the diet variable.
 
 -   **Bacteroidetes** and **Firmicutes** also exhibit opposite behaviors, consistent with their biological significance.
 :::
-:::
-
-## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
-
-::: {style="text-align: center; font-size: 24px;"}
--   The clear separation between green and pink points indicates that the microbiome composition is strongly influenced by diet.
-
--   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
-
-![](images/pc1vspc2-06.png){fig-align="center"}
 :::
 
 ## Analysis of Microbiome Clusters by Donor Groups Using Hierarchical Clustering
