@@ -6,17 +6,16 @@ format:
     embed-resources: true
 ---
 
-# Run-all quarto documents in this folder
-
-This script is running the entire program, by running all the quarto documents in the folder and rendering them to .html.
+### 1. Load packages
 
 ```{r}
-# Load libraries
 library("tidyverse")
 library("quarto")
 library("fs")
 library("here")
 ```
+
+### 2. Render Quarto documents
 
 We are going to find all the Quarto documents in the R folder (i.e, those that end in .qmd, with the exception of 00_all.qmc)
 
@@ -36,6 +35,8 @@ qmd_files |>
 
 cat("Rendering complete.\n")
 ```
+
+### 3. Move html files to result folder and delete unwanted folders
 
 Then, we will move the .html files to the results folder. In the source directory, some folders (whose name end with "\_files") are also created, which include the figures of the plots in their respective Quarto document. We don't want to keep them, because these figures are already being saved in the results folder when executing the .qmd files.
 
