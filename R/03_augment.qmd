@@ -129,3 +129,8 @@ head(phylum_aggregated_wide)
 write_tsv(phylum_aggregated_wide, 
           "../data/03_metadata_wide_phylum.tsv")
 ```
+
+```{r}
+write_tsv(otu_df_modified, 
+          "../data/03_data_otu_modified.tsv")
+```
