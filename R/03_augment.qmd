@@ -72,10 +72,22 @@ Such delirium of dataset is the result of complete lack of manual curation and c
 The taxonomical information of some OTUs is missing. For these cases, we are going to use the label "Unclassified":
 
 ```{r}
-otu_df_modified <-  otu_df_original |> 
-  select(OTU.ID, Phylum, Class) |> 
-  mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
-  mutate(Class = if_else(Class == "", "Unclassified", Class))
+otu_df_modified <- otu_df_original |> 
+  select(
+    OTU.ID, 
+    Phylum, 
+    Class
+  ) |> 
+  mutate(Phylum = if_else(
+    Phylum == "",
+    "Unclassified",
+    Phylum)
+  ) |> 
+  mutate(Class = if_else(
+    Class == "", 
+    "Unclassified", 
+    Class)
+  )
 
 head(otu_df_modified)
 ```
@@ -116,4 +128,9 @@ head(phylum_aggregated_wide)
 ```{r}
 write_tsv(phylum_aggregated_wide, 
           "../data/03_metadata_wide_phylum.tsv")
+```
+
+```{r}
+write_tsv(otu_df_modified, 
+          "../data/03_data_otu_modified.tsv")
 ```

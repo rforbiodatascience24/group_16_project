@@ -262,7 +262,7 @@ filtered_metadata_label <- filtered_metadata |>
                                    CollectionMet == 1 ~ "Scraping")) |> 
   mutate(Sex = case_when(Sex == 0 ~ "Male",
                          Sex == 1 ~ "Female")) 
-head(filtered_metadata_stricter_label)
+head(filtered_metadata_label)
 ```
 
 Some subsequent analyses will require us to use a wide dataset:

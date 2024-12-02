@@ -11,32 +11,19 @@ editor: visual
 
 ```{r}
 #| message: false 
-<<<<<<< HEAD
-library("tidyverse") 
-=======
 library("tidyverse")
->>>>>>> main
+library("ggthemes")
 ```
 
 ### Read data
 
 ```{r}
-clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', 
+clean_df <- read.table('../data/03_metadata_long_filtered_taxonomy.tsv', 
                        header=TRUE, 
                        sep='\t')
 # head(clean_df)
 ```
 
-<<<<<<< HEAD
-```{r}
-raw_data <- read.table('../data/01_data_metadata.tsv', 
-                       header=TRUE, 
-                       sep='\t')
-# head(raw_data)
-```
-
-=======
->>>>>>> main
 ### Microbiota composition differences due to sex
 
 ```{r}
@@ -54,15 +41,17 @@ clean_df |>
            position = "stack") +
   geom_hline(yintercept = 0) +
   labs(
-    title = "Relative Abundance of Phyla by Sex",
+    title = "Relative abundance of phyla by sex",
     x = "Sex",
-    y = "Relative Abundance",
+    y = "Relative abundance",
     fill = "Phylum"
   ) +
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -71,7 +60,7 @@ As seen in the plot above there are no data for female mice in the first generat
 ```{r}
 clean_df |> 
   group_by(Donor, Sex) |> 
-  count(Sex)
+  summarise(count = n())
 ```
 
 There are only female mice in the humanized mouse with LFPP diet graft, and the differences in sample size are huge in comparison to male individuals. Thus, this analysis cannot be done.
@@ -97,16 +86,18 @@ plot1 <- clean_df |>
   geom_hline(yintercept = 0) +
   facet_wrap(~ Diet) + 
   labs(
-    title = "Relative Abundance of Phyla per source and diet type",
+    title = "Relative abundance of phyla per source and diet type",
     x = "Source type",
     y = "Relative Abundance",
     fill = "Phyla"
   ) +
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom", # change when data augmentation has been done
         legend.text = element_text(size = 8),
         axis.text.x = element_text(angle = 45, 
-                                   hjust = 1))
+                                   hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
 ggsave("../results/rel_abund_phyla_source_diet.png", 
        plot = plot1, 
@@ -120,22 +111,19 @@ plot1
 
 This plots represents the differences in microbiome phyla (in terms of relative abundance) found among different parts of the gut and feces in two different diets: LFFP and Western diet. Simply by observing the figure we can obtain valuable insights.
 
-<<<<<<< HEAD
-=======
 Firstly, we can find differences in phyla's relative abundance among the different parts of the mice's gut. However, the differences are noteworthy between diet types, showing a lower abundance of *Proteobacteria* and higher *Verrucomicrobia* in Western diet compared to the LFPP diet.
 
 Another noteworthy observation is that in mice following an LFFP diet the *Firmicutes* abundance is more or less constant along the different sections of the gut, whereas in the Western diet there is a lower proportion in Cecum samples than in the SI samples.
 
 These differences in relative abundance indicate a modulation of the microbiome by the diet type, and of course, it could have consequences on health. It would be interesting to analyse how this differential abundance could impact for example obesity risk, and also find out if there are some parts of the gut that have greater relevance in determining that risk.
 
->>>>>>> main
 ### Microbiota composition of mice with different diet and donor combination (relative abundance of phyla)
 
 In order to compare the general composition of the microbiota in the mice with different donor and diet, we may represent the relative abundance of the most prevalent phyla.
 
 ```{r}
 plot2 <- clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source != "Fecal" ) |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern")) |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
@@ -151,15 +139,17 @@ plot2 <- clean_df |>
   geom_hline(yintercept = 0) +
   facet_wrap(~ Diet) + 
   labs(
-    title = "Relative Abundance of Phyla per donor and diet type",
+    title = "Relative abundance of phyla per donor and diet type",
     x = "Donor type",
     y = "Relative Abundance",
     fill = "Phylum"
   ) +
+  scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
 ggsave("../results/rel_abund_diet_donor_comb.png", 
        plot = plot2, 
@@ -168,6 +158,7 @@ ggsave("../results/rel_abund_diet_donor_comb.png",
        units = "in", 
        bg = "white")
 
+plot2
 ```
 
 This plot is very informative, as it allows us to explore several of the different experiments carried out by the original authors of the dataset:
@@ -175,75 +166,3 @@ This plot is very informative, as it allows us to explore several of the differe
 -   Overall, we can see that the Western diet leads to a lower proportion of *Bacteroidetes* and unclassified phyla, and a higher one of *Verrucomicrobia.*
 
 -   When focusing on the first generation of humanised mice ("Fresh" donor), we can see that diet greatly affects the microbiota composition. The LF-PP diet leads to a much higher proportion of *Bacteroidetes* and a much smaller one of *Actinobacteria*. Furthermore, there are less bacteria belonging to unclassified phyla in the Western diet, and more *Verrucomicrobia.*
-
-<<<<<<< HEAD
-$$
-H' = -\sum_{i=1}^R p_i \ln p_i \\
-p_i \text{ is the relative abundance of OTU}_i\\ R \text{ is the total number of OTUs}
-$$
-
-We will compare this index for first generation humanised mice following each diet. For this purpose, we will use the original raw data, in which all OTU counts (including the less abundant ones) are included.
-
-We first store the diet column in a dataframe.
-
-```{r}
-diet_data <- raw_data |> 
-  filter(Donor == 3 & Source != 4 & Diet %in% c(0, 1)) |> #we select 1st generation humanised mice (donor is fresh), get rid of microbiota samples that were not taken at the time of sacrifice (source is not fecal), and we select the LFPP (0) and Western (1) diets
-  select(Diet) |> 
-  mutate(Diet = case_when(Diet == 0 ~ "LFPP",
-                          Diet == 1 ~ "Western"))
-```
-
-We calculate the Shannon index for each row and save it in a new dataframe.
-
-```{r}
-shannon <- raw_data |> 
-  filter(Donor == 3 & Source != 4 & Diet %in% c(0, 1)) |> #same filters as before
-  select(starts_with("OTU")) |> #we only need the OTU columns to calculate the index 
-  mutate(across(everything(), ~ (-1)*.x * log(.x))) |> #we transform each OTU relative abundance column (p_i) into p_i*log(p_i) 
-  rowwise() |> #we apply the following operations row by row
-  mutate(
-    sum_all_columns = sum(across(everything()), na.rm = TRUE), #we add the products to calculate the shannon_index
-    .keep = "unused") |> #we only keep the new shannon index column
-  ungroup()
-```
-
-We combine both dataframes and calculate the Shannon index and its standard deviation for each diet.
-
-```{r}
-combined_df <- bind_cols(diet_data, shannon)  #combination of both dataframes
-final_shannon <- combined_df |> #generate a final data frame with the shannon index and sd for each diet
-  group_by(Diet) |>
-  summarise(
-    shannon_index= mean(sum_all_columns),
-    standard_dev = sd(sum_all_columns)
-  )
-final_shannon
-```
-
-Finally, we plot the index for each of the studied diets.
-
-```{r}
-# Plot with error bars
-ggplot(final_shannon, aes(x = Diet, y = shannon_index)) +
-  geom_col(aes(fill = Diet), width = 0.6) +  # Adjust column width
-  geom_errorbar(aes(ymin = shannon_index - standard_dev, ymax = shannon_index + standard_dev), 
-                width = 0.2) +  # Error bar width
-  labs(
-    title = "Biodiversity in microbiota",
-    x = "Diet",
-    y = "Shannon diversity index"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",  # Remove legend
-    plot.title = element_text(size = 16, hjust = 0.5),  # Big centered title
-    axis.title = element_text(size = 14),  # Large axis labels
-    axis.text = element_text(size = 12)    # Large axis text
-  )
-```
-=======
--   Regarding the second generation of humanised mice ("Hmouse..." donor), we can observe that the bars with the same donor are more similar to each other ("HmouseLFPP" versus "HmouseWestern") than those with the same diet ("LFPP" vs "Western"). This indicates that the diet that their "donor" followed may be more determinant in the composition of their gut microbiota than the diet the mice follow themselves.
->>>>>>> main
-
--   Though the diet factor has the most obvious effect on the first generation of humanised mice, the diet followed also visibly influenced the microbiota of the second generation of humanised mice. For instance, mice with donors on the LFPP diet ("HmouseLFPP" donor) presented starkly different proportions of *Verrucomicrobia* and *Bacteroidetes* depending on their current diet.

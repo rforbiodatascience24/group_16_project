@@ -37,7 +37,7 @@ if (!dir.exists(raw_folder)) {
 file_id <- "1CW63f5yjQsfovsbEJECvi1NlxkAIEer4"
 
 # Definition of the destination path 
-dest_path <- file.path(raw_folder, "Microbiome_data.zip")
+dest_path <- file.path(target_folder, "Microbiome_data.zip")
 
 # Download the file into _raw
 drive_download(as_id(file_id), 

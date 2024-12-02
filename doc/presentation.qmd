@@ -17,17 +17,13 @@ format:
 editor: visual
 ---
 
-```{r}
-library("knitr")
-library("kableExtra")
-library("tidyverse")
-```
-
 # Introduction
 
 ::: columns
 ::: {.column width="50%"}
 ![](images/article_title.png)
+
+![](./images/article_title.png){.absolute top="200" left="0" width="1200" height="400"}
 
 -   Metagenomics study focusing on an animal model of the human gut ecosystem obtained by transplanting fresh human fecal microbial communities into germ-free C57BL/6J mice.
 
@@ -45,46 +41,44 @@ To study the relationship between the composition of the gut microbiota and fact
 :::
 :::
 
-# Materials and Methods
-
-## General Workflow
+## Data Loading
 
 ::: {style="font-size: 22px;"}
-::: columns
-::: {.column width="50%"}
-![](images/workflow.png)
+-   **MicrobiomeWithMetadata.csv** (Main dataset):\
+    Contains the relative abundance of OTUs analyzed per observation, along with the conditions of each sample (e.g., diet, sex, etc.).
+
+    ```{r}
+    #| message: false 
+    #| echo: true
+    library(tidyverse) 
+    # Read the data
+    metadata_df <- read_tsv(file = str_c('../data/01_data_metadata.tsv'))
+
+    # Check the structure of the data
+    head(metadata_df)
+    ```
+
+-   **MicrobiomeMetadataDictionary.csv** (Complementary):\
+    Provides the equivalence between coded numerical values and their corresponding sample conditions.
+
+-   **MicrobiomeOTUtaxonomy.csv** (Complementary):\
+    Contains the taxonomic classification of each OTU analyzed.
+
+-   **Source:**\
+    [Explore Microbiome Dataset](https://www.exploredata.net/Downloads/Microbiome-Data-Set)\
+    Curated version of the microbiome dataset from Turnbaugh *et al.* (original publication available in accompanying files).
 :::
 
-::: {.column width="50%" style="font-size: 25 px"}
-```{r}
-data_folder <- "../data"
-# Read the data
-metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
-```
-:::
-:::
-:::
+# Materials and Methods
 
-## Data tidying and filtering
-
-::: {.nonincremental style="font-size: 25px;"}
--   Added a SampleID column to uniquely identify each sample.
-
--   Transformed the dataset from wide to long format for easier analysis.
-
--   Filtering Low-Abundance OTUs: Retained OTUs contributing up to 95% of cumulative abundance.
-
--   Replaced the numeric codes with descriptive labels.
-:::
+## Data Tidying and Filtering
 
 ::: {style="font-size: 20px;"}
-::: columns
-::: {.column width="50%" style="font-size: 30px;"}
+-   Added a `SampleID` column to uniquely identify each sample + Transformed the dataset from **wide** to **long** format for easier analysis.
+
 ```{r}
 #| echo: true
-#| eval: false
-#| results: hide
-#| code-line-numbers: "2-5|8-11|17-26|38-44"
+#| output-location: column
 
 # Creation and relocation of SampleID
 metadata_df <- metadata_df |>
@@ -98,31 +92,47 @@ metadata_df_long <- metadata_df |>
     names_to = "OTU", 
     values_to = "rel_abundance"
   )
-
 head(metadata_df_long)
+```
 
+-   Filtering Low-Abundance OTUs: Retained OTUs contributing up to **95% of cumulative abundance**. Additionally, removed OTUs with extremely low relative abundances.
+
+-   Replaced the numeric codes with descriptive labels.
+:::
+
+::: columns
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
 # Calculate cumulative contribution
 cumulative_otus <- metadata_df_long |>
   group_by(OTU) |>
   summarize(mean_abundance = mean(rel_abundance)) |>
   arrange(desc(mean_abundance)) |>
   mutate(cumulative_abundance = cumsum(mean_abundance) / sum(mean_abundance))
-
 # Filter OTUs contributing to 95% cumulative abundance
 otus_to_keep <- cumulative_otus |>
   filter(cumulative_abundance <= 0.95) |>
   pull(OTU)
+# Filter the metadata to retain only these OTUs
+filtered_metadata <- metadata_df_long |>
+  filter(OTU %in% otus_to_keep)
+dim(filtered_metadata)
+# Set the stricter abundance threshold
+abundance_threshold <- 1e-6
+# Apply the threshold to filter OTUs
+filtered_metadata_stricter <- filtered_metadata |>
+  filter(rel_abundance >= abundance_threshold)
+dim(filtered_metadata_stricter)
 
-# Number of OTUs before filtering
-n_total_otus <- metadata_df_long |> 
-  pull(OTU) |> 
-  n_distinct()
 
-# Number of OTUs after filtering
-n_filtered_otus <- filtered_metadata |> 
-  pull(OTU) |> 
-  n_distinct()
 
+```
+:::
+
+::: {.column width="50%" style="overflow-y: scroll; height: 300px; font-size: 22px;"}
+```{r}
+#| echo: true
 filtered_metadata_stricter_label <- filtered_metadata_stricter |> 
   mutate(Diet = case_when(Diet == 0 ~ "LFPP",
                           Diet == 1 ~ "Western",
@@ -154,10 +164,8 @@ filtered_metadata_stricter_label <- filtered_metadata_stricter |>
                                    CollectionMet == 1 ~ "Scraping")) |> 
   mutate(Sex = case_when(Sex == 0 ~ "Male",
                          Sex == 1 ~ "Female")) 
-head(filtered_metadata_stricter_label)
 ```
 :::
-
 ::: {.column width="50%" style="text-align: center;"}
 ![](images/cumulative_abundance_OTU.png){width="628"}
 :::
@@ -177,7 +185,11 @@ head(clean_df)
 ```
 
 and ready to augment it...
+:::
 
+## Our data is tidy... and ready to be augmented!
+
+::: {style="font-size: 27px;"}
 We will use the OTUs taxonomy file to add columns with the names of phylum and class for each OTU, using `left_join`.
 
 ```{r}
@@ -185,13 +197,14 @@ We will use the OTUs taxonomy file to add columns with the names of phylum and c
 otu_df_original <- read.table('../data/01_data_otu.tsv', 
                               header = TRUE, 
                               sep = ",")
-
-otu_df_modified <-  otu_df_original |> 
-  select(OTU.ID, Phylum, Class) |> 
-  mutate(Phylum = if_else(Phylum == "", "Unclassified", Phylum)) |> 
-  mutate(Class = if_else(Class == "", "Unclassified", Class))
-
-head(otu_df_modified)
+#| echo: true
+clean_df <- read_tsv('../data/02_metadata_long_filtered_label.tsv')
+head(clean_df)
+```
+```
+:::
+:::
+:::
 ```
 
 ```{r}
@@ -214,13 +227,13 @@ head(clean_df_taxonomy)
 
 ::: columns
 ::: {.column width="50%"}
--   **Sources and Diet Types**
+-   **sources and diet types**
 
     ![](images/phyla_sour_diet.png){width="750"}
 :::
 
 ::: {.column width="50%"}
--   **Diet and Donor Combination**
+-   **diet and donor combination**
 
     ![](images/phyla_don_diet.png){width="750"}
 :::
@@ -228,35 +241,45 @@ head(clean_df_taxonomy)
 
 </div>
 
-## Analyses
+## 05
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
-::: {style="text-align: center; font-size: 22px;"}
--   The clear separation between green and pink points indicates that the microbiome composition is strongly influenced by diet.
+```{r}
+#| include: false
+library(broom)
+library(ggrepel)
+library(cowplot)
+```
 
--   Samples from the Western diet have distinct characteristics compared to those from the LFPP diet, as reflected in their separation along the principal components.
+::: columns
+::: {.column width="50%" style="font-size: 25px;"}
+```{r}
+#| echo: true
+# Aggregate relative abundances by phylum
+aggregated_data <- clean_df_augm |>
+  filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
+  group_by(SampleID, Phylum, Diet) |> 
+  summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
 
-![](images/pc1vspc2-08.png){width="696"}
+# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
+aggregated_wide <- aggregated_data |> 
+  pivot_wider(names_from = Phylum, values_from = rel_abundance) |> 
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1)) #pca uses numerical values so we modify the diet column
+
+# Check of the aggregated data
+head(aggregated_wide)
+```
+
+![](images/pca_variance-01.png){width="800"}
+:::
 :::
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
 ::: columns
-::: {.column width="40%" style="text-align: center; font-size: 23px;"}
--   The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability
-
-![](images/pca_variance-14.png){width="580"}
-:::
-
-::: {.column width="60%" style="text-align: center; font-size: 22px;"}
-![](images/pca_contributions-13.png){width="580"}
-
--   Western diet correlates with a negative PC1 coordinate, which aligns with Western diet observations found on the left of the previous scatter plot.
-
--   **Unclassified** phyla present an opposite behavior to the diet variable.
-
--   ***Bacteroidetes*** and ***Firmicutes*** also exhibit opposite behaviors, consistent with their biological significance.
+::: {.column width="50%"}
+![![](images/clipboard-1125396256.png)](images/pca_contributions-06.png){width="700"}
 :::
 :::
 
@@ -303,7 +326,7 @@ clustered_metadata <- filtered_metadata_wider |>
 :::
 
 ::: {.column width="60%" style="text-align: center;"}
-![](images/clusters-01.png){width="652"}
+![](images/clusters-01.png){width="621"}
 :::
 :::
 
