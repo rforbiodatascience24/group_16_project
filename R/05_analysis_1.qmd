@@ -75,7 +75,7 @@ diet_phylum_nested <- diet_phylum_nested |>
                                       data = .x)))
 ```
 
-The model results are tidied to extract relevant estimates, including p-values and confidence intervals. Afterward, p-values are adjusted for multiple testing, and OTUs with significant associations to diet are identified based on a threshold (q-value \< 0.05).
+The model results are tidied to extract estimates, p-values and confidence intervals. Afterward, p-values are adjusted for multiple testing, and OTUs with significant associations to diet are identified based on a threshold (q-value \< 0.05).
 
 ```{r}
 otus_estimate <- diet_phylum_nested |> 
