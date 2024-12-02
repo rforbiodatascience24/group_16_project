@@ -123,7 +123,7 @@ In order to compare the general composition of the microbiota in the mice with d
 
 ```{r}
 plot2 <- clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern")) |> 
+  filter(Diet %in% c("LFPP", "Western") & Donor %in% c("Fresh", "HMouseLFPP", "HMouseWestern") & Source !="Feces") |> 
   group_by(Donor, Diet) |> 
   mutate(norm_rel_abundance = rel_abundance / sum(rel_abundance)) |> # Normalize abundance within samples
   group_by(Donor, Diet, Phylum) |> 
@@ -165,4 +165,8 @@ This plot is very informative, as it allows us to explore several of the differe
 
 -   Overall, we can see that the Western diet leads to a lower proportion of *Bacteroidetes* and unclassified phyla, and a higher one of *Verrucomicrobia.*
 
--   When focusing on the first generation of humanised mice ("Fresh" donor), we can see that diet greatly affects the microbiota composition. The LF-PP diet leads to a much higher proportion of *Bacteroidetes* and a much smaller one of *Actinobacteria*. Furthermore, there are less bacteria belonging to unclassified phyla in the Western diet, and more *Verrucomicrobia.*
+-   When focusing on the first generation of humanised mice ("Fresh" donor), we can see that diet greatly affects the microbiota composition. The LF-PP diet leads to a much higher proportion of *Bacteroidetes* and a smaller one of *Actinobacteria*. Furthermore, there are less bacteria belonging to unclassified phyla in the Western diet, and more *Verrucomicrobia.*
+
+-   Regarding the second generation of humanised mice ("Hmouse..." donor), we can observe that the bars with the same donor are more similar to each other ("HmouseLFPP" versus "HmouseWestern") than those with the same diet ("LFPP" vs "Western"). This indicates that the diet that their "donor" followed may be more determinant in the composition of their gut microbiota than the diet the mice follow themselves.
+
+-   Though the diet factor has the most obvious effect on the first generation of humanised mice, the diet followed also visibly influenced the microbiota of the second generation of humanised mice. For instance, mice whose donors were on the Western diet ("HmouseWestern" donor) presented starkly different proportions of *Verrucomicrobia* and *Bacteroidetes* depending on their current diet.
