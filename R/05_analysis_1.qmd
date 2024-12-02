@@ -56,6 +56,8 @@ diet_phylum <- clean_df |>
                          Diet == "Western" ~ 1))
 ```
 
+Then, we create a nested data frame:
+
 ```{r}
 diet_phylum_nested <- diet_phylum |> 
   group_by(OTU) |> 
@@ -98,30 +100,22 @@ otus_estimate <- diet_phylum_nested |>
   )
 ```
 
+We will select the OTUs whose relative abundance significantly changes between the two dietary groups:
+
 ```{r}
-otus_test <- otus_estimate |>  
+otus_significant <- otus_estimate |>  
   left_join(otu_df_modified, 
             join_by(OTU == OTU.ID)) |> 
   relocate(Phylum, Class, .after = OTU) |> 
   filter(is_significant == "yes") 
 ```
 
-This process allows us to select OTUs whose relative abundance significantly changes between the two dietary groups, resulting in the selection of 84 OTUs.
+We can see that a large proportion of OTUs have a relative abundance which is significantly different between both diet types (153 out of 355).
+
+We are going to represent the estimates (95% confidence intervals) of the 30 OTUs with the highest statistical significance (lower q-value):
 
 ```{r}
-filtered_diet <- diet_phylum |> 
-  filter(Diet == 1) |> 
-  distinct(OTU, .keep_all = TRUE) |> 
-  select(Diet, 
-         OTU)
-```
-
-```{r}
-otus_test |> 
-  # Join estimates with filtered data by OTU
-  inner_join(filtered_diet, by = "OTU") |> 
-  # Keep only significant OTUs
-  filter(is_significant == "yes") |> 
+otus_significant |> 
   arrange(q.value) |> 
   slice_head(n = 30) |> 
   # Plot reordering OTUs by their effect estimates
@@ -143,7 +137,7 @@ otus_test |>
       color = "gray"
     ) +
     labs(
-      title = "Top 30 OTUs associated with Western diet",
+      title = "Top 30 OTUs with significant different \n relative abundances according to diet",
       subtitle = "Colored by Phylum",
       x = "Estimates (95% Confidence Intervals)",
       y = "OTU"
@@ -151,7 +145,7 @@ otus_test |>
     theme_minimal() +
     theme(
       plot.title = element_text(hjust = 0.5, size = 14),
-      plot.subtitle = element_text(hjust = 0.5, size = 12)
+      plot.subtitle = element_text(hjust = 0.5, size = 10)
     )
 ```
 
@@ -161,7 +155,7 @@ By focusing on a specific OTU that showed variation between the diets, we confir
 
 ```{r}
 diet_phylum |>  
-  filter(OTU == "OTU710") |> 
+  filter(OTU == "OTU5948") |> 
   group_by(Diet) |>          
   summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE))
 ```
