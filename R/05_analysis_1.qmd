@@ -13,15 +13,14 @@ library("tidyverse")
 library("ggrepel")
 library("ggtext")
 library("broom") 
+library("readr")
 ```
 
 ### 2. Read data
 
 ```{r}
-clean_df <- read.table('../data/03_metadata_long_filtered_taxonom.tsv', 
-                       header=TRUE, 
-                       sep='\t')
-head(clean_df)
+clean_df <- read_tsv(file = '../data/03_metadata_long_filtered_taxonomy.tsv') 
+otu_df_modified <- read_tsv(file = '../data/03_data_otu_modified.tsv')
 ```
 
 ### 3. Analysis
@@ -34,7 +33,7 @@ As an initial approach to see the "obesity-inducing" effects of this diet on the
 
 ```{r}
 ratio_data <- clean_df |> 
-  filter(Diet %in% c("LFPP", "Western") & Donor == "Fresh" & Source != "Fecal" ) |>
+  filter(Diet %in% c("LFPP", "Western") & Donor == "Fresh") |>
   group_by(Diet) |> 
   summarise(Firmicutes = sum(rel_abundance[Phylum == "Firmicutes"]),
             Bacteroidetes = sum(rel_abundance[Phylum == "Bacteroidetes"])) |> 
@@ -45,39 +44,20 @@ ratio_data
 
 As expected, the ratio is bigger in the Western diet of first generation humanized mice (less Bacteroidetes and more Firmicutes proportionately).
 
-To investigate this phenomenon more rigorously, we will develop and analyse models. Specifically, we want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes/Bacteroidetes depending on the diets LFPP or Western.
+To investigate this phenomenon more rigorously, we will develop and analyse models. Specifically, we want to test if there are differences in the relative abundance of the OTUs belonging to Firmicutes or Bacteroidetes depending on the diets LFPP or Western.
 
 First, we will filter for the two types of diets and the two phyla we will be working with:
 
 ```{r}
-diet_phylum <- 
-  clean_df |> 
+diet_phylum <- clean_df |> 
   filter(Phylum == "Firmicutes" | Phylum == "Bacteroidetes") |>  
   filter(Diet == "LFPP" | Diet == "Western") |>  
   mutate(Diet = case_when(Diet == "LFPP" ~ 0, 
                          Diet == "Western" ~ 1))
 ```
 
-In order to perform the model estimation, we first need to filter out variables that have only one value. This is necessary because these variables cause errors during the modeling process, as they lack variability required for proper statistical analysis.
-
 ```{r}
-diet_phylum_count <- diet_phylum |> 
-  group_by(OTU) |> 
-  count(OTU) |> 
-  filter (n == 1) |> 
-  select(OTU)
-```
-
-```{r}
-otus_to_remove <- diet_phylum_count |> 
-  pull(OTU)
-
-diet_phylum_filtered <- diet_phylum |> 
-  filter(!OTU %in% otus_to_remove)
-```
-
-```{r}
-diet_phylum_nested <- diet_phylum_filtered |> 
+diet_phylum_nested <- diet_phylum |> 
   group_by(OTU) |> 
   nest() |> 
   ungroup()
@@ -102,7 +82,11 @@ otus_estimate <- diet_phylum_nested |>
   ) |>  
   unnest(model_object_tidy) |> 
   filter(term == "Diet") |>
-  select (OTU, p.value, estimate, conf.low, conf.high) |> 
+  select (OTU, 
+          p.value, 
+          estimate, 
+          conf.low, 
+          conf.high) |> 
   ungroup() |> 
   mutate(
     # Adjust p-values
@@ -125,10 +109,11 @@ otus_test <- otus_estimate |>
 This process allows us to select OTUs whose relative abundance significantly changes between the two dietary groups, resulting in the selection of 84 OTUs.
 
 ```{r}
-filtered_diet <- diet_phylum_analysis |> 
+filtered_diet <- diet_phylum |> 
   filter(Diet == 1) |> 
   distinct(OTU, .keep_all = TRUE) |> 
-  select(Diet, OTU)
+  select(Diet, 
+         OTU)
 ```
 
 ```{r}
@@ -140,14 +125,25 @@ otus_test |>
   arrange(q.value) |> 
   slice_head(n = 30) |> 
   # Plot reordering OTUs by their effect estimates
-  ggplot(aes(x = estimate, y = fct_reorder(OTU, estimate), color = Phylum)) +
+  ggplot(
+    aes(x = estimate, 
+        y = fct_reorder(OTU, estimate), 
+        color = Phylum)
+    ) +
     geom_point(size = 2) +
     # Add horizontal error bars for confidence intervals
-    geom_errorbarh(aes(xmax = conf.high, xmin = conf.low)) +
+    geom_errorbarh(
+      aes(xmax = conf.high, 
+          xmin = conf.low)
+    ) +
     # Add a vertical line at 0 for reference
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray") +
+    geom_vline(
+      xintercept = 0, 
+      linetype = "dashed", 
+      color = "gray"
+    ) +
     labs(
-      title = "Top 30 OTUs Associated with Western Diet",
+      title = "Top 30 OTUs associated with Western diet",
       subtitle = "Colored by Phylum",
       x = "Estimates (95% Confidence Intervals)",
       y = "OTU"
@@ -164,7 +160,7 @@ This plot highlights the top 30 OTUs significantly associated with the Western D
 By focusing on a specific OTU that showed variation between the diets, we confirmed that the OTU demonstrates a clear shift in its abundance, indicating that it is influenced by the dietary conditions.
 
 ```{r}
-diet_phylum_analysis |>  
+diet_phylum |>  
   filter(OTU == "OTU710") |> 
   group_by(Diet) |>          
   summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE))
@@ -176,7 +172,7 @@ Moreover, counting the number of OTUs associated with each diet and phylum helps
 vector_otus <- otus_test |> 
   pull(OTU)
 
-result <- diet_phylum_analysis |> 
+result <- diet_phylum |> 
   filter(OTU %in% vector_otus) |>  
   group_by(OTU, Diet) |> 
   summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE), 
@@ -192,14 +188,18 @@ result <- diet_phylum_analysis |>
 result <- result |>  
   left_join(otu_df_modified, 
             join_by(OTU == OTU.ID)) |> 
-  select(OTU, Phylum, higher_in)
+  select(OTU, 
+         Phylum, 
+         higher_in)
 ```
 
 ```{r}
 contingency_table <- result %>%
   group_by(higher_in, Phylum) %>%
   summarize(count = n(), .groups = "drop") %>%
-  pivot_wider(names_from = Phylum, values_from = count, values_fill = 0)
+  pivot_wider(names_from = Phylum, 
+              values_from = count, 
+              values_fill = 0)
 
 contingency_table
 ```
@@ -209,15 +209,21 @@ plot_data <- result |>
   group_by(Phylum, higher_in) |> 
   summarize(count = n(), .groups = "drop")
 
-ggplot(plot_data, aes(x = Phylum, y = count, fill = higher_in)) +
-  geom_bar(stat = "identity", position = "dodge") + 
-  labs(
-    title = "OTUs with Higher Relative Abundance by Diet",
-    x = "Phylum",
-    y = "Number of OTUs",
-    fill = "Higher in"
-  ) +
-  theme_minimal()
+plot_data |>
+  ggplot(
+    aes(x = Phylum, 
+        y = count,
+        fill = higher_in)
+    ) +
+    geom_bar(stat = "identity", position = "dodge") + 
+    labs(
+      title = "OTUs with higher relative abundance by diet",
+      x = "Phylum",
+      y = "Number of OTUs",
+      fill = "Higher in"
+    ) +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5))
 ```
 
 A substantial number of Firmicutes OTUs exhibit higher relative abundance in the Western Diet, indicating that Firmicutes are likely more influenced by the characteristics of diets high in fats and sugars. The more balanced distribution of Bacteroidetes and Firmicutes in the LFPP Diet suggests a healthier microbiota composition, often associated with diets rich in fiber and low in processed foods.
