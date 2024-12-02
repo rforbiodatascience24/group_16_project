@@ -203,7 +203,7 @@ head(clean_df_taxonomy)
 
 # Results and Discussion
 
-## Microbiota composition in terms of phyla in different:
+## Microbiota composition in terms of phyla in different
 
 <div>
 
@@ -223,7 +223,132 @@ head(clean_df_taxonomy)
 
 </div>
 
-## 05
+## Linear model and identification of OTUs differently associated to diet
+
+<div>
+
+::: columns
+::: {.column width="50%" style="font-size: 32px;"}
+```{r}
+#| echo: true
+#| eval: false
+
+diet_phylum_nested <- diet_phylum_nested |> 
+  group_by(OTU) |>  
+  mutate(model_object = map (.x = data, 
+                             .f = ~lm(formula = rel_abundance ~ Diet, 
+                                      data = .x)))
+```
+
+After fitting the linear model, we did multiple testing correction and evaluated the statistical significance:
+
+```{r}
+#| echo: false
+#| eval: true
+
+library("tidyverse")
+library("ggrepel")
+library("ggtext")
+library("broom") 
+library("readr")
+
+clean_df <- read_tsv(file = '../data/03_metadata_long_filtered_taxonomy.tsv') 
+
+diet_phylum <- clean_df |> 
+  filter(Phylum == "Firmicutes" | Phylum == "Bacteroidetes") |>  
+  filter(Diet == "LFPP" | Diet == "Western") |>  
+  mutate(Diet = case_when(Diet == "LFPP" ~ 0, 
+                         Diet == "Western" ~ 1))
+
+diet_phylum_nested <- diet_phylum |> 
+  group_by(OTU) |> 
+  nest() |> 
+  ungroup()
+
+diet_phylum_nested <- diet_phylum_nested |> 
+  group_by(OTU) |>  
+  mutate(model_object = map (.x = data, 
+                             .f = ~lm(formula = rel_abundance ~ Diet, 
+                                      data = .x)))
+
+otus_estimate <- diet_phylum_nested |> 
+  mutate(model_object_tidy = map(.x = model_object, 
+                                 .f = ~tidy(.x, conf.int = TRUE, conf.level = 0.95))
+  ) |>  
+  unnest(model_object_tidy) |> 
+  filter(term == "Diet") |>
+  select (OTU, 
+          p.value, 
+          estimate, 
+          conf.low, 
+          conf.high) |> 
+  ungroup() |> 
+  mutate(
+    # Adjust p-values
+    q.value = p.adjust(p.value), 
+    is_significant = case_when( 
+      q.value >= 0.05 ~ "no",
+      q.value < 0.05 ~ "yes"
+      )
+  )
+
+head(otus_estimate)
+```
+:::
+
+::: {.column width="50%"}
+![](images/otus_associated_western_diet_model.png){width="1076"}
+
+```{r}
+#| echo: false
+#| eval: true
+otus_significant <- otus_estimate |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  relocate(Phylum, Class, .after = OTU) |> 
+  filter(is_significant == "yes")
+
+vector_otus <- otus_significant |> 
+  pull(OTU)
+
+result <- diet_phylum |> 
+  filter(OTU %in% vector_otus) |>  
+  group_by(OTU, Diet) |> 
+  summarize(total_rel_abundance = mean(rel_abundance), 
+            .groups = "drop") |> 
+  group_by(OTU) |> 
+  # Find which diet presents higer average abundance for each OTU 
+  mutate(higher_in = if_else(
+    total_rel_abundance[Diet == 0] > total_rel_abundance[Diet == 1], 
+    "LFPP Diet", 
+    "Western Diet")) |> 
+  distinct(OTU, higher_in)
+
+# Add taxonomic information
+result <- result |>  
+  left_join(otu_df_modified, 
+            join_by(OTU == OTU.ID)) |> 
+  select(OTU, 
+         Phylum, 
+         higher_in)
+```
+
+```{r}
+#| echo: false
+#| eval: false
+contingency_table <- result |> 
+  group_by(higher_in, Phylum) |> 
+  summarize(count = n(), 
+            .groups = "drop") |> 
+  pivot_wider(names_from = Phylum, 
+              values_from = count)
+
+contingency_table
+```
+:::
+:::
+
+</div>
 
 ## Principal Component Analysis on Phylum-Level Aggregated Microbiome Data
 
@@ -361,7 +486,6 @@ chi2_result
 :::
 
 ::: {.column width="50%"}
-
 ![](images/clusters-05.png){fig-align="center" width="690"}
 :::
 :::
