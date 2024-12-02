@@ -12,10 +12,6 @@ In this section, we perform PCA on microbiome data aggregated at the phylum leve
 #### 1. **Load libraries**
 
 ```{r}
-<<<<<<< HEAD
-library(tidyverse)
-library(broom)
-=======
 #| message: false 
 library("tidyverse")
 library("broom")

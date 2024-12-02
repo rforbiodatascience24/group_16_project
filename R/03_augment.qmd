@@ -1,6 +1,6 @@
 ---
 title: "Data augmentation"
-author: Lucía de Lamadrid, Jorge Santiago Bajo, Eric Torres García
+author: Lucía de Lamadrid, Jorge Santiago Bajo, Eric Torres García, Elena Iriondo Delgado
 format:
   html:
     embed-resources: true
