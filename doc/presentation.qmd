@@ -486,7 +486,7 @@ chi2_result
 :::
 
 ::: {.column width="50%"}
-![](images/clusters-04.png){fig-align="center" width="690"}
+![](images/clusters-06.png){fig-align="center"}
 :::
 :::
 
