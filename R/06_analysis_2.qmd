@@ -308,14 +308,20 @@ We use a bar plot to visualize the proportion of donor groups within each cluste
 clusters <- ggplot(cluster_metadata_summary, aes(x = Cluster, y = Proportion, fill = Donor)) +
   geom_bar(stat = "identity", position = "fill") +
   scale_y_continuous(labels = scales::percent) +
-  scale_fill_brewer(palette = "Dark2")
+  scale_fill_brewer(palette = "Dark2")+
   labs(
     title = "Proportion of Donor Groups Within Clusters",
     x = "Cluster",
     y = "Proportion",
     fill = "Donor"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    legend.text = element_text(size = 15),
+    panel.grid.major = element_blank()
+  )
+  
 
 clusters
 
