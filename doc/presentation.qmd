@@ -520,12 +520,16 @@ $$ H' = -\sum_{i=1}^R p_i \ln p_i \\ p_i \text{ is the relative abundance of OTU
 
 # Conclusions
 
--   The "obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio.
+-   The "obesity-inducing" diet influences the Firmicutes-Bacteroidetes ratio.Associated to this, we have identified certain OTUs which show a significantly different abundance between both diets.
 
 <!-- -->
 
 -   PCA shows how diet shapes microbial composition, as well as the relationship between different phyla.
 
+<!-- -->
+
 -   Clustering shines light on how the microbiota donor structures the data.
+
+<!-- -->
 
 -   The Western diet favours a more biodiverse gut "ecosystem".
