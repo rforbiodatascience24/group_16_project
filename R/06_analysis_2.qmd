@@ -16,52 +16,37 @@ In this section, we perform PCA on microbiome data aggregated at the phylum leve
 library("tidyverse")
 library("broom")
 library("ggrepel")
+library("ggthemes")
 library("cowplot")
 ```
 
-#### 2. Load data
+#### 2. Load data for PCA
 
-For this analysis we will use the "03_metadata_long_filtered_taxonom.tsv" data frame, that contains metadata, OTU counts and taxonomic information for each sample.
-
-```{r}
-# load data
-clean_df_augm <- read_tsv("../data/03_metadata_long_filtered_taxonom.tsv")
-head(clean_df_augm)
-```
-
-#### 3. Prepare data for PCA
-
-To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanised mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
+To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanized mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
 
 ```{r}
-# Aggregate relative abundances by phylum
-aggregated_data <- clean_df_augm |>
-  filter(Donor == "Fresh") |> #we select the first generation of humanised mice (we don't select the western and lfpp diet as these are the only diets these mice follow)
-  group_by(SampleID, Phylum, Diet) |> 
-  summarize(rel_abundance = sum(rel_abundance), .groups = "drop")
+aggregated_wide <- read_tsv("../data/03_metadata_wide_phylum.tsv")
 
-# Pivot wider and one-hot coding of diet variable to prepare for PCA (SampleID by Phylum)
-aggregated_wide <- aggregated_data |> 
-  pivot_wider(names_from = Phylum, values_from = rel_abundance, values_fill = 0) |> 
+aggregated_wide <- aggregated_wide |> 
+  filter(Donor == "Fresh") |> 
   mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
 
-# Check of the aggregated data
-head(aggregated_wide)
+aggregated_wide
 ```
 
-#### 4. Performing PCA
+#### 3. Performing PCA
 
 Using the aggregated data, we scale the phylum-level abundances and apply PCA. This identifies the key axes of variation in the dataset, summarizing complex microbial community structures into principal components.
 
 ```{r}
 # Scale the aggregated data and perform PCA
 otu_data_pca <- aggregated_wide |> 
-  select(-SampleID) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
+  select(-SampleID, -Diet, -Donor) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
   scale() |> 
   prcomp()
 ```
 
-#### 5. Explaining Variance
+#### 4. Explaining Variance
 
 To understand how much of the dataset’s variability is captured by each principal component, we analyze the explained variance.
 
@@ -107,7 +92,7 @@ ggsave("../results/pca_variance.png",
 
 The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
 
-#### 6. **Visualizing PC1 vs PC2**
+#### 5. **Visualizing PC1 vs PC2**
 
 We plot the first two principal components (PC1 and PC2) to visualize the differences between diets.
 
@@ -149,7 +134,7 @@ ggsave("../results/pc1vspc2.png",
 
 The plot shows clear clustering according to diet, with observations of the LFPP diet accumulating on the lower right corner of the grid.
 
-#### 7. **Understanding contributions to PC1 and PC2**
+#### 6. **Understanding contributions to PC1 and PC2**
 
 Now, we will represent the individual contributions of each variable to the first two principal components. Analysing the contributions of individual phyla to the first two principal components can allow us to identify key taxa driving variation in the data. This provides biological insights into which phyla influence microbiome differences.
 
