@@ -16,9 +16,7 @@ Read data
 
 ```{r}
 #| message: false 
-wide_df <- read.table('../data/02_metadata_wide_filtered_label.tsv', 
-                       header=TRUE, 
-                       sep='\t')
+wide_df <- read_tsv('../data/02_metadata_wide_filtered_label.tsv')
 #head(wide_df)
 ```
 
@@ -36,7 +34,7 @@ We calculate the Shannon index for each row and save it in a new dataframe.
 
 ```{r}
 shannon <- wide_df |> 
-  filter(Donor == "Fresh" & Source != "Fecal" & Diet %in% c("Western", "LFPP")) |>#first generation ("fresh" donor), only take into account "final" snapshots of the microbiota (no intermediate fecal samples), and we make sure we are only comparing the two diets 
+  filter(Donor == "Fresh" & Source != "Feces" & Diet %in% c("Western", "LFPP")) |>#first generation ("fresh" donor), only take into account "final" snapshots of the microbiota (no intermediate fecal samples), and we make sure we are only comparing the two diets 
   group_by(Diet) |> 
   select(starts_with("OTU")) |> #we only need the OTU columns to calculate the index 
   mutate(across(everything(), ~ (-1)*.x * log(.x))) |> #we transform each OTU relative abundance column (p_i) into p_i*log(p_i) 
@@ -53,8 +51,7 @@ We now carry out a t test in order to compare the shannon index of both populati
 ```{r}
 t_test_result <- shannon |> 
   summarise(
-    t_test = list(t.test(sh ~ Diet, data = cur_data()))
-  ) %>%
+    t_test = list(t.test(sh ~ Diet, data = cur_data()))) |> 
   pull(t_test)
 t_test_result
 ```
@@ -79,9 +76,11 @@ shannon_plot <-shannon |> group_by(Diet) |>
   theme_minimal() +
   theme(
     legend.position = "none",  # Remove legend
-    plot.title = element_text(size = 16, hjust = 0.5),  # Big centered title
-    axis.title = element_text(size = 14),  # Large axis labels
-    axis.text = element_text(size = 12)    # Large axis text
+    axis.text.x = element_text(size = 14, hjust = 0.5),
+    axis.text.y = element_text(size = 14),
+    axis.title.x = element_text(size = 15), 
+    axis.title.y = element_text(size = 15),
+    plot.title = element_text(hjust = 0.5, size = 17)
   )
 
 ggsave("../results/shannon.png", 
@@ -90,9 +89,7 @@ ggsave("../results/shannon.png",
        height = 6, 
        units = "in", 
        bg = "white")
-```
 
-```{r}
 shannon_plot
 ```
 
