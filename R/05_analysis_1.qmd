@@ -149,36 +149,37 @@ otus_significant |>
     )
 ```
 
-This plot highlights the top 30 OTUs significantly associated with the Western Diet, colored by their respective phyla (Firmicutes and Bacteroidetes). Most OTUs with positive estimates (higher abundance in the Western Diet) belong to Firmicutes, while some Bacteroidetes are negatively associated.
+Most OTUs with positive estimates (higher abundance in the Western Diet, 1) belong to Firmicutes, while some Bacteroidetes are negatively associated. This observation aligns to the results from the ration.
 
-By focusing on a specific OTU that showed variation between the diets, we confirmed that the OTU demonstrates a clear shift in its abundance, indicating that it is influenced by the dietary conditions.
+By focusing on a specific OTU that showed significant variation in the abundance between the two diets (e.g. OTU5691), we confirmed that there is a clear shift in its abundance, indicating that this metric is influenced by the dietary conditions.
 
 ```{r}
 diet_phylum |>  
-  filter(OTU == "OTU5948") |> 
+  filter(OTU == "OTU5691") |> 
   group_by(Diet) |>          
-  summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE))
+  summarize(total_rel_abundance = mean(rel_abundance))
 ```
 
 Moreover, counting the number of OTUs associated with each diet and phylum helps identify trends, such as a particular phylum showing a stronger association with one diet compared to the other.
 
 ```{r}
-vector_otus <- otus_test |> 
+vector_otus <- otus_significant |> 
   pull(OTU)
 
 result <- diet_phylum |> 
   filter(OTU %in% vector_otus) |>  
   group_by(OTU, Diet) |> 
-  summarize(total_rel_abundance = mean(rel_abundance, na.rm = TRUE), 
+  summarize(total_rel_abundance = mean(rel_abundance), 
             .groups = "drop") |> 
   group_by(OTU) |> 
+  # Find which diet presents higer average abundance for each OTU 
   mutate(higher_in = if_else(
     total_rel_abundance[Diet == 0] > total_rel_abundance[Diet == 1], 
     "LFPP Diet", 
     "Western Diet")) |> 
   distinct(OTU, higher_in)
 
-
+# Add taxonomic information
 result <- result |>  
   left_join(otu_df_modified, 
             join_by(OTU == OTU.ID)) |> 
@@ -187,13 +188,15 @@ result <- result |>
          higher_in)
 ```
 
+We represent a contigency table with the results and then show a bar plot:
+
 ```{r}
-contingency_table <- result %>%
-  group_by(higher_in, Phylum) %>%
-  summarize(count = n(), .groups = "drop") %>%
+contingency_table <- result |> 
+  group_by(higher_in, Phylum) |> 
+  summarize(count = n(), 
+            .groups = "drop") |> 
   pivot_wider(names_from = Phylum, 
-              values_from = count, 
-              values_fill = 0)
+              values_from = count)
 
 contingency_table
 ```
@@ -201,7 +204,8 @@ contingency_table
 ```{r}
 plot_data <- result |> 
   group_by(Phylum, higher_in) |> 
-  summarize(count = n(), .groups = "drop")
+  summarize(count = n(), 
+            .groups = "drop")
 
 plot_data |>
   ggplot(
@@ -211,13 +215,15 @@ plot_data |>
     ) +
     geom_bar(stat = "identity", position = "dodge") + 
     labs(
-      title = "OTUs with higher relative abundance by diet",
+      title = "Number of OTUs with higher relative abundance by diet",
+      subtitle = "Only OTUs with significant different abundance between diets were considered",
       x = "Phylum",
       y = "Number of OTUs",
       fill = "Higher in"
     ) +
     theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5, size = 14),
+          plot.subtitle = element_text(hjust = 0.5, size = 10))
 ```
 
-A substantial number of Firmicutes OTUs exhibit higher relative abundance in the Western Diet, indicating that Firmicutes are likely more influenced by the characteristics of diets high in fats and sugars. The more balanced distribution of Bacteroidetes and Firmicutes in the LFPP Diet suggests a healthier microbiota composition, often associated with diets rich in fiber and low in processed foods.
+A substantial number of OTUs belonging to the phylum Firmicutes exhibit higher relative abundance in the Western diet than in LFPP, indicating that Firmicutes are likely more influenced by the characteristics of diets high in fats and sugars. The more balanced distribution between Bacteroidetes and Firmicutes in the LFPP diet suggests a healthier microbiota composition, often associated with diets rich in fiber and low in processed foods.
