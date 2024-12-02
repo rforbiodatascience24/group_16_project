@@ -94,10 +94,11 @@ plot1 <- clean_df |>
   scale_fill_colorblind() +
   theme_minimal() +
   theme(legend.position = "bottom", # change when data augmentation has been done
-        legend.text = element_text(size = 8),
+        legend.text = element_text(size = 9),
         axis.text.x = element_text(angle = 45, 
-                                   hjust = 1), 
-        plot.title = element_text(hjust = 0.5))
+                                   hjust = 1, 
+                                   size = 13),
+        plot.title = element_text(hjust = 0.5, size = 17))
 
 ggsave("../results/rel_abund_phyla_source_diet.png", 
        plot = plot1, 
