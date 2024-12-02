@@ -1,7 +1,9 @@
 ---
 title: "07_analysis_3"
 author: "Eric Torres, Lucía de Lamadrid, Elena Iriondo, Konstantina Gkopi and Jorge Santiago"
-format: html
+format:
+  html:
+    embed-resources: true
 editor: visual
 ---
 
