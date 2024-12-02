@@ -21,9 +21,6 @@ library("readr")
 #| message: false 
 data_folder = "../data"
 
-metadata_df <- read.table(str_c(data_folder, '/01_data_metadata.tsv'), 
-                          header = TRUE, 
-                          sep = '\t')
 # Read the data
 metadata_df <- read_tsv(file = str_c(data_folder, '/01_data_metadata.tsv'))
 
@@ -46,7 +43,6 @@ The original dataset has dimensions $N = 675$ and $M = 6702$.
 As the dataset lacks of an identifier which can act as primary key, we introduce a numeric surrogate key using the row number (SampleID):
 
 ```{r}
-
 #| message: false 
 metadata_df <- metadata_df |>
   mutate(SampleID = row_number()) |> 
