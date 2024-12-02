@@ -22,16 +22,16 @@ library("cowplot")
 
 #### 2. Load data for PCA
 
-To perform PCA, we aggregate the microbiome data by summing relative abundances within each phylum. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanized mice, etc.). Once we have prepared the selected columns, we will reshape the data into a wide format suitable for PCA analysis.
+To perform PCA, we use the wide aggregated microbiome data in which the relative abundances within each phylum are summed. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanized mice, etc.).
 
 ```{r}
 aggregated_wide <- read_tsv("../data/03_metadata_wide_phylum.tsv")
 
 aggregated_wide <- aggregated_wide |> 
-  filter(Donor == "Fresh") |> 
+  filter(Donor == "Fresh" ) |> 
   mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
 
-aggregated_wide
+head(aggregated_wide)
 ```
 
 #### 3. Performing PCA
@@ -41,7 +41,7 @@ Using the aggregated data, we scale the phylum-level abundances and apply PCA. T
 ```{r}
 # Scale the aggregated data and perform PCA
 otu_data_pca <- aggregated_wide |> 
-  select(-SampleID, -Diet, -Donor) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
+  select(-SampleID, -Donor) |> #remove the sample id column as this categorical variable adds no information (it's the same as a row count in this case)
   scale() |> 
   prcomp()
 ```
@@ -90,7 +90,7 @@ ggsave("../results/pca_variance.png",
        bg = "white")
 ```
 
-The PCA variance table shows that PC1 and PC2 together explain 62.41% of the total variance, with PC1 accounting for 43.68% and PC2 for 18.73%. Including PC3 and PC4 increases the cumulative explained variance to 90.42%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
+The PCA variance table shows that PC1 and PC2 together explain 55.34% of the total variance, with PC1 accounting for 38.94% and PC2 for 16.40%. Including PC3, PC4 and PC5 increases the cumulative explained variance to 92.06%, capturing most of the dataset’s variability. Variance contributions drop significantly for subsequent components, making PC1 and PC2 the most relevant for analysis. This highlights the effectiveness of PCA in summarizing key microbial variation driven by diet and phylum-level differences.
 
 #### 5. **Visualizing PC1 vs PC2**
 
@@ -115,7 +115,7 @@ pca2 <- otu_data_pca |>
   theme(
     panel.grid.major = element_blank(),
     legend.position = "right",
-    plot.title = element_text(size = 25, hjust = 0.5, face = "bold"),
+    plot.title = element_text(size = 25, hjust = 0.5),
     legend.title = element_text(size = 20),
     legend.text = element_text(size = 15),
     axis.title.x = element_text(size = 14),
@@ -190,11 +190,11 @@ The biplot illustrates the contributions of the variables to the first two princ
 
 -   **Unclassified** phyla present an opposite behavior to the diet variable. This is in line with the barplots presented in the description section, which showed more OTUs from unclassified phyla could be found in the LFPP diet.
 
--   **Bacteroidetes** and **Firmicutes** also exhibit opposite behaviors, consistent with their biological significance. As explained in other sections, the ratio of Firmicutes to *Bacteroidetes* serves as a well-established marker for obesity.
+-   **Bacteroidetes** and **Firmicutes** also exhibit opposite behaviors, consistent with their biological significance. As explained in other sections, the ratio of Firmicutes to Bacteroidetes serves as a well-established marker for obesity.
 
 -   **Verrucomicrobia** and **Proteobacteria** cluster together, contributing to PC2.
 
--   The **Actinobacteria** vector has the same direction as Firmicutes, but is of a much smaller magnitude. This is due to the fact that the relative abundance of OTUs belonging to this phylum varies less.
+-   **TM7** and **Actinobacteria** present vectors of a much smaller magnitude due to the fact that the relative abundance of OTUs belonging to these phyla vary less. Furthermore, Actinobacteria has the same direction as Firmicutes, in line with the data description results.
 
 This plot emphasizes that a few dominant phyla drive the main axes of variation in microbial communities, underscoring the importance of these phyla in shaping the microbial composition and potentially influencing host health outcomes.
 
