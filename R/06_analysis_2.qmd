@@ -27,8 +27,11 @@ library("cowplot")
 To perform PCA, we use the wide aggregated microbiome data in which the relative abundances within each phylum are summed. This reduces dimensionality while retaining relevant biological information. In order to subject it to the PCA, we will also have to one-hot encode the Diet column, as this method only allows for numerical variables. Regarding the other columns, we will not include them in the analysis as the classes for this experiment are very imbalanced (e.g. no female mice, only cecum and fecal samples were obtained from first generation humanized mice, etc.).
 
 ```{r}
+#| message: false 
 aggregated_wide <- read_tsv("../data/03_metadata_wide_phylum.tsv")
+```
 
+```{r}
 aggregated_wide <- aggregated_wide |> 
   filter(Donor == "Fresh" ) |> 
   mutate( Diet = case_when(Diet == "LFPP" ~ 0, Diet == "Western" ~ 1) ) #pca uses numerical values so we modify the diet column
@@ -209,9 +212,12 @@ Hierarchical clustering, on the other hand, allowed us to group microbiota profi
 For this analysis we will use the 02_metadata_wide_filtered_label.tsv" data frame, that contains metadata and OTU counts for each sample.
 
 ```{r}
+#| message: false 
 # Read the metadata in wide format
 filtered_metadata_wider <- read_tsv("../data/02_metadata_wide_filtered_label.tsv")
+```
 
+```{r}
 # Select OTU columns
 otu_data <- filtered_metadata_wider |>
   select(starts_with("OTU"))

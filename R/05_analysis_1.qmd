@@ -21,6 +21,7 @@ library("readr")
 ### 2. Read data
 
 ```{r}
+#| message: false 
 clean_df <- read_tsv(file = '../data/03_metadata_long_filtered_taxonomy.tsv') 
 otu_df_modified <- read_tsv(file = '../data/03_data_otu_modified.tsv')
 ```

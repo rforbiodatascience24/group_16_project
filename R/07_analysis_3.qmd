@@ -51,6 +51,7 @@ head(shannon)
 We now carry out a t test in order to compare the shannon index of both populations (western versus LF-PP diet). As the sample size is large, we do not test for normality previously.
 
 ```{r}
+#| warning: false 
 t_test_result <- shannon |> 
   summarise(
     t_test = list(t.test(sh ~ Diet, data = cur_data()))) |> 
